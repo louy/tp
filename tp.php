@@ -227,7 +227,7 @@ function tp_section_text() {
 
 function tp_get_connect_button($action='', $type='authenticate', $image ='Sign-in-with-Twitter-darker') {
 	$image = apply_filters('tp_connect_button_image', $image, $action, $type);
-	$imgsrc = apply_filters('tp_connect_button_image', plugins_url('/images/'.$image.'.png', __FILE__), $image, $action, $type);
+	$imgsrc = apply_filters('tp_connect_button_image_src', plugins_url('/images/'.$image.'.png', __FILE__), $image, $action, $type);
 	return '<a href="'.esc_attr(get_bloginfo('home').'/?oauth_start=1&tpaction='.urlencode($action).'&loc='.urlencode(tp_get_current_url()).'&type='.urlencode($type)).'">'.
 		   '<img src="'.$imgsrc.'" />'.
 		   '</a>';
