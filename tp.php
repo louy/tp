@@ -3,7 +3,7 @@
 Plugin Name: TP
 Description: TweetPress, All the tools you need to integrate your wordpress and twitter.
 Author: Louy
-Version: 0.1
+Version: 0.2
 Author URI: http://louyblog.wordpress.com
 Text Domain: tp
 Domain Path: /po
@@ -21,7 +21,7 @@ load_plugin_textdomain( 'tp', false, dirname( plugin_basename( __FILE__ ) ) . '/
  * TweetPress Core:
  */
 
-define('TP_VERSION', '0.1');
+define('TP_VERSION', '0.2');
 
 add_action('init','tp_init');
 function tp_init() {
@@ -226,8 +226,10 @@ function tp_section_text() {
 }
 
 function tp_get_connect_button($action='', $type='authenticate', $image ='Sign-in-with-Twitter-darker') {
-	return '<a href="'.esc_attr(get_bloginfo('home').'/?oauth_start=1&tpaction='.urlencode($action).'&loc='.urlencode(tp_get_current_url()).'&type='.urlencode($type)).'">'.
-		   '<img src="'.plugins_url('/images/'.$image.'.png', __FILE__).'" />'.
+	$image = apply_filters('tp_connect_button_image', $image, $action, $type);
+	$imgsrc = apply_filters('tp_connect_button_image_src', plugins_url('/images/'.$image.'.png', __FILE__), $image, $action, $type);
+	return '<a href="'.esc_attr(get_bloginfo('home').'/?oauth_start=1&tpaction='.urlencode($action).'&loc='.urlencode(tp_get_current_url()).'&type='.urlencode($type)).'" title="'.__('Sign in with Twitter').'">'.
+		   '<img src="'.$imgsrc.'" alt="'.__('Sign in with Twitter').'" style="border:none;" />'.
 		   '</a>';
 }
 
@@ -779,5 +781,179 @@ function tweetbutton_validate_options($input) {
 		$input['tweetbutton_singleonly'] = false;
 	}
 
+	return $input;
+}
+
+/**
+ * TweetPress Publish
+ */
+
+// add the meta boxes
+add_action('admin_menu', 'tp_publish_meta_box_add');
+function tp_publish_meta_box_add() {
+	add_meta_box('tp-publish-div', __('Twitter Publisher'), 'tp_publish_meta_box', 'post', 'side');
+}
+
+// add the admin sections to the tp page
+add_action('admin_init', 'tp_publish_admin_init');
+function tp_publish_admin_init() {
+	add_settings_section('tp_publish', __('Publish Settings'), 'tp_publish_section_callback', 'tp');
+	add_settings_field('tp_publish_flags', __('Automatic Publishing'), 'tp_publish_auto_callback', 'tp', 'tp_publish');
+	add_settings_field('tp_publish_text', __('Publish Tweet Text'), 'tp_publish_text', 'tp', 'tp_publish');
+	wp_enqueue_script('jquery');
+}
+
+function tp_publish_section_callback() {
+	echo "<p>Settings for the Publish function. The manual Twitter Publishing buttons can be found on the Edit Post screen, after you publish a post. If you can't find them, try scrolling down or seeing if you have the box disabled in the Options dropdown.</p>";
+}
+
+function tp_publish_auto_callback() {
+	$options = tp_options();
+	if (!$options['autotweet_flag']) $options['autotweet_flag'] = false;
+	?>
+	<p><label><?php _e('Automatically Tweet on Publish:'); ?> <input type="checkbox" name="tp_options[autotweet_flag]" value="1" <?php checked('1', $options['autotweet_flag']); ?> /></label></p>
+	<?php 
+	$tw = tp_get_credentials(true);
+	if ($tw->screen_name) echo "<p>Currently logged in as: <strong>{$tw->screen_name}</strong></p>";
+	
+	if ($options['autotweet_name']) {
+		echo "<p>Autotweet set to Twitter User: <strong>{$options['autotweet_name']}</strong></p>";
+	} else {
+		echo "<p>Autotweet not set to a Twitter user.</p>";
+	}
+	echo '<p>To auto-publish new posts to any Twitter account, click this button and then log into that account to give the plugin access.</p><p>Authenticate for auto-tweeting: '.tp_get_connect_button('publish_preauth', 'authorize').'</p>';
+	echo '<p>Afterwards, you can use this button to log back into your own normal account, if you are posting to a different account than your normal one. </p><p>Normal authentication: '.tp_get_connect_button('', 'authorize').'</p>';
+}
+
+function tp_publish_text() {
+	$options = tp_options();
+	if (!$options['publish_text']) $options['publish_text'] = __('%title% %url%[ifauthor] by %author%[/ifauthor]');
+
+	echo "<input type='text' name='tp_options[publish_text]' value='{$options['publish_text']}' size='40' /><br />";
+	echo '<p>Use %title% for the post title.</p>';
+	echo '<p>Use %url% for the post link (or shortlink).</p>';
+	echo '<p>Use %author% for the author twitter username (@l0uy for example).</p>';
+	echo '<p>Use [ifauthor][/ifauthor] to check if the author have a twitter account.</p>';
+}
+
+add_action('tp_publish_preauth','tp_publish_preauth');
+function tp_publish_preauth() {
+	if ( ! current_user_can('manage_options') )
+		wp_die(__('You do not have sufficient permissions to manage options for this blog.'));
+
+	$tw = tp_get_credentials(true);
+
+	$options = tp_options();
+	
+	// save the special settings
+	if ($tw->screen_name) {
+		$options['autotweet_name'] = $tw->screen_name;
+		$options['autotweet_token'] = $_SESSION['tp_acc_token'];
+		$options['autotweet_secret'] = $_SESSION['tp_acc_secret'];
+	}
+	
+	update_option('tp_options', $options);
+}
+
+function tp_publish_meta_box( $post ) {
+	$options = tp_options();
+	
+	if ($post->post_status == 'private') {
+		echo '<p>'.__('Why would you put private posts on Twitter, for all to see?').'</p>';
+		return;
+	}
+	
+	if ($post->post_status !== 'publish') {
+		echo '<p>'.__('After publishing the post, you can send it to Twitter from here.').'</p>';
+		return;
+	}
+	
+?><div id="tp-publish-buttons">
+<div id="tp-manual-tweetbox" style="width:auto; padding-right:10px;"></div>
+<script type="text/javascript">
+  var tbox=new Array();
+  tbox['height'] = 100;
+  tbox['width'] = jQuery('#tp-manual-tweetbox').width();
+  tbox['defaultContent'] = <?php echo json_encode(tp_get_default_tweet($post->ID)); ?>;
+  tbox['label'] = '<?php __('Tweet this:'); ?>';
+  twttr.anywhere(function (T) {
+    T("#tp-manual-tweetbox").tweetBox(tbox);
+  });
+</script>
+</div>
+<?php
+}
+
+// this new function prevents edits to existing posts from auto-posting
+add_action('transition_post_status','tp_publish_auto_check',10,3);
+function tp_publish_auto_check($new, $old, $post) {
+	if ($new == 'publish' && $old != 'publish') {
+		if ($post->post_type == 'post' || $post->post_type == 'page') 
+			tp_publish_automatic($post->ID, $post);
+	}
+}
+
+function tp_publish_automatic($id, $post) {
+	
+	// check to make sure post is published
+	if ($post->post_status !== 'publish') return;
+	
+	// check options to see if we need to send to FB at all
+	$options = tp_options();
+	if (!$options['autotweet_flag'] || !$options['autotweet_token'] || !$options['autotweet_secret'] || !$options['publish_text']) 
+		return;
+	
+	// args to send to twitter
+	$args=array();
+
+	$args['status'] = tp_get_default_tweet($id);
+
+	$args['acc_token'] = $options['autotweet_token'];
+	$args['acc_secret'] = $options['autotweet_secret'];
+	
+	$resp = tp_do_request('http://api.twitter.com/1/statuses/update',$args);
+}
+
+function tp_get_default_tweet($id) {
+	$options = tp_options();
+	if (function_exists('wp_get_shortlink')) {
+		// use the shortlink if it's available
+		$link = wp_get_shortlink($id);
+	} else if (function_exists('get_shortlink')) {
+		// use the shortlink if it's available
+		$link = get_shortlink($id);
+	} else {
+		// use the full permalink (twitter will shorten for you)
+		$link = get_permalink($id);
+	}
+
+	$output = $options['publish_text'];
+	$output = str_replace('%title%', get_the_title($id), $output );
+	$output = str_replace('%url%', $link, $output );
+	
+	$post = get_post($id);
+	$authortw = get_the_author_meta('twuid',$post->post_author);
+	if( $authortw ) {
+		$output = str_replace('[ifauthor]', '', str_replace('[/ifauthor]', '', $output ) );
+		$output = str_replace('%author%', '@'.$authortw ,$output );
+	} else {
+		$output = preg_replace('/\[ifauthor\].*\[\/ifauthor\]/', '', $output);
+	}
+
+	return $output;
+}
+
+add_filter('tp_validate_options','tp_publish_validate_options');
+function tp_publish_validate_options($input) {
+	$options = tp_options();
+	if ($input['autotweet_flag'] != 1) $input['autotweet_flag'] = 0;
+	
+	$input['publish_text'] = trim($input['publish_text']);
+	
+	// preserve existing vars which are not inputs
+	$input['autotweet_name'] = $options['autotweet_name'];
+	$input['autotweet_token'] = $options['autotweet_token'];
+	$input['autotweet_secret'] = $options['autotweet_secret'];
+	
 	return $input;
 }
