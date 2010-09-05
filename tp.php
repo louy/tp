@@ -1,7 +1,7 @@
 <?php
 /*
-Plugin Name: TweetPress
-Description: All the tools you need to integrate your wordpress and twitter.
+Plugin Name: TP
+Description: TweetPress, All the tools you need to integrate your wordpress and twitter.
 Author: Louy
 Version: 0.1
 Author URI: http://louyblog.wordpress.com
@@ -62,14 +62,14 @@ register_activation_hook(__FILE__, 'tp_activation_check');
 // action links
 add_filter('plugin_action_links_'.plugin_basename(__FILE__), 'tp_links', 10, 1);
 function tp_links($links) {
-	$links[] = '<a href="'.admin_url('options-general.php?page=tp').'">'.__('Settings').'</a>';
+	$links[] = '<a href="'.admin_url('options-general.php?page=tp').'">'.__('Settings', 'tp').'</a>';
 	return $links;
 }
 
 // add the admin options page
 add_action('admin_menu', 'tp_admin_add_page');
 function tp_admin_add_page() {
-	add_options_page(__('TweetPress'), __('TweetPress'), 'manage_options', 'tp', 'tp_options_page');
+	add_options_page(__('TweetPress', 'tp'), __('TweetPress', 'tp'), 'manage_options', 'tp', 'tp_options_page');
 }
 
 // add the admin settings and such
@@ -77,28 +77,28 @@ add_action('admin_init', 'tp_admin_init',9);
 function tp_admin_init(){
 	$options = tp_options();
 	if (empty($options['consumer_key']) || empty($options['consumer_secret'])) {
-		add_action('admin_notices', create_function( '', "echo '<div class=\"error\"><p>".sprintf(__('TweetPress needs to be configured on its <a href="%s">settings</a> page.'), admin_url('options-general.php?page=tp'))."</p></div>';" ) );
+		add_action('admin_notices', create_function( '', "echo '<div class=\"error\"><p>".sprintf(__('TweetPress needs to be configured on its <a href="%s">settings</a> page.', 'tp'), admin_url('options-general.php?page=tp'))."</p></div>';" ) );
 	} 
 	wp_enqueue_script('jquery');
 	register_setting( 'tp_options', 'tp_options', 'tp_options_validate' );
-	add_settings_section('tp_main', __('TweetPress Main Settings'), 'tp_section_text', 'tp');
-	if (!defined('TWITTER_CONSUMER_KEY')) add_settings_field('tp_consumer_key', __('Twitter Consumer Key'), 'tp_setting_consumer_key', 'tp', 'tp_main');
-	if (!defined('TWITTER_CONSUMER_SECRET')) add_settings_field('tp_consumer_secret', __('Twitter Consumer Secret'), 'tp_setting_consumer_secret', 'tp', 'tp_main');
+	add_settings_section('tp_main', __('TweetPress Main Settings', 'tp'), 'tp_section_text', 'tp');
+	if (!defined('TWITTER_CONSUMER_KEY')) add_settings_field('tp_consumer_key', __('Twitter Consumer Key', 'tp'), 'tp_setting_consumer_key', 'tp', 'tp_main');
+	if (!defined('TWITTER_CONSUMER_SECRET')) add_settings_field('tp_consumer_secret', __('Twitter Consumer Secret', 'tp'), 'tp_setting_consumer_secret', 'tp', 'tp_main');
 }
 
 // display the admin options page
 function tp_options_page() {
 ?>
 	<div class="wrap">
-	<h2><?php _e('TweetPress'); ?></h2>
-	<p><?php _e('Options related to the TweetPress plugin.'); ?></p>
+	<h2><?php _e('TweetPress', 'tp'); ?></h2>
+	<p><?php _e('Options related to the TweetPress plugin.', 'tp'); ?></p>
 	<form method="post" action="options.php">
 	<?php settings_fields('tp_options'); ?>
 	<table><tr><td>
 	<?php do_settings_sections('tp'); ?>
 	</td></tr></table>
 	<p class="submit">
-	<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
+	<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes', 'tp') ?>" />
 	</p>
 	</form>
 
@@ -201,25 +201,25 @@ function tp_section_text() {
 	$options = tp_options();
 	if (empty($options['consumer_key']) || empty($options['consumer_secret'])) {
 ?>
-<p><?php _e('To connect your site to Twitter, you will need a Twitter Application. If you have already created one, please insert your Consumer Key and Consumer Secret below.'); ?></p>
-<p><strong><?php _e('Can&#39;t find your key?'); ?></strong></p>
+<p><?php _e('To connect your site to Twitter, you will need a Twitter Application. If you have already created one, please insert your Consumer Key and Consumer Secret below.', 'tp'); ?></p>
+<p><strong><?php _e('Can&#39;t find your key?', 'tp'); ?></strong></p>
 <ol>
-<li><?php _e('Get a list of your applications from here: <a target="_blank" href="http://dev.twitter.com/apps">Twitter Application List'); ?></a></li>
-<li><?php _e('Select the application you want, then copy and paste the Consumer Key and Consumer Secret from there.'); ?></li>
+<li><?php _e('Get a list of your applications from here: <a target="_blank" href="http://dev.twitter.com/apps">Twitter Application List', 'tp'); ?></a></li>
+<li><?php _e('Select the application you want, then copy and paste the Consumer Key and Consumer Secret from there.', 'tp'); ?></li>
 </ol>
 
-<p><strong><?php _e('Haven&#39;t created an application yet?</strong> Don&#39;t worry, it&#39;s easy!'); ?></p>
+<p><strong><?php _e('Haven&#39;t created an application yet?</strong> Don&#39;t worry, it&#39;s easy!', 'tp'); ?></p>
 <ol>
-<li><?php _e('Go to this link to create your application: <a target="_blank" href="http://dev.twitter.com/apps/new">Twitter: Register an Application</a>'); ?></li>
-<li><?php _e('Important Settings:'); ?><ol>
-<li><?php _e('Application Type must be set to "Browser".'); ?></li>
-<li><?php printf(__('Callback URL must be set to "%s".'), get_bloginfo('home')); ?></li>
-<li><?php _e('Default Access type must be set to "Read and Write".'); ?></li>
-<li><?php _e('Use Twitter for login must be checked (enabled).'); ?></li>
+<li><?php _e('Go to this link to create your application: <a target="_blank" href="http://dev.twitter.com/apps/new">Twitter: Register an Application</a>', 'tp'); ?></li>
+<li><?php _e('Important Settings:', 'tp'); ?><ol>
+<li><?php _e('Application Type must be set to "Browser".', 'tp'); ?></li>
+<li><?php printf(__('Callback URL must be set to "%s".', 'tp'), get_bloginfo('home')); ?></li>
+<li><?php _e('Default Access type must be set to "Read and Write".', 'tp'); ?></li>
+<li><?php _e('Use Twitter for login must be checked (enabled).', 'tp'); ?></li>
 </ol>
 </li>
-<li><?php _e('The other application fields can be set up any way you like.'); ?></li>
-<li><?php _e('After creating the application, copy and paste the Consumer Key and Consumer Secret from the Application Details page.'); ?></li>
+<li><?php _e('The other application fields can be set up any way you like.', 'tp'); ?></li>
+<li><?php _e('After creating the application, copy and paste the Consumer Key and Consumer Secret from the Application Details page.', 'tp'); ?></li>
 </ol>
 <?php
 	}
@@ -290,15 +290,15 @@ function anywhereloader() {
  */
 add_action('admin_init', 'tp_comm_admin_init');
 function tp_comm_admin_init() {
-	add_settings_section('tp_comm', __('Comment Settings'), 'tp_comm_section_callback', 'tp');
-	add_settings_field('tp_allow_comments', __('Allow Twitter users to comment?'), 'tp_setting_allow_comments', 'tp', 'tp_comm');
-	add_settings_field('tp_comm_text', __('Comment Tweet Text'), 'tp_comm_text', 'tp', 'tp_comm');
+	add_settings_section('tp_comm', __('Comment Settings', 'tp'), 'tp_comm_section_callback', 'tp');
+	add_settings_field('tp_allow_comments', __('Allow Twitter users to comment?', 'tp'), 'tp_setting_allow_comments', 'tp', 'tp_comm');
+	add_settings_field('tp_comm_text', __('Comment Tweet Text', 'tp'), 'tp_comm_text', 'tp', 'tp_comm');
 }
 
 function tp_comm_section_callback() {
-	echo '<p>'.__('Allow twitter users to comment and set the tweet style, use % for shortlink.').'</p>';
+	echo '<p>'.__('Allow twitter users to comment and set the tweet style, use % for shortlink.', 'tp').'</p>';
 	if (!function_exists('get_shortlink') && !function_exists('wp_get_shortlink')) {
-		echo '<p>'.__('Warning: No URL Shortener plugin detected. Links used will be full permalinks.').'</p>';
+		echo '<p>'.__('Warning: No URL Shortener plugin detected. Links used will be full permalinks.', 'tp').'</p>';
 	}
 }
 
@@ -354,7 +354,7 @@ function tp_comm_footer_script() {
 				$options = tp_options();
 				if (!empty($options['comment_text'])) {  // dont do this if disabled 
 				?>
-				jQuery('#tp_comm_send').html('<input style="width: auto;" type="checkbox" name="tp_comm_send" value="send"/><label for="tp_comm_send"><?php _e('Send Comment to Twitter'); ?></label>');
+				jQuery('#tp_comm_send').html('<input style="width: auto;" type="checkbox" name="tp_comm_send" value="send"/><label for="tp_comm_send"><?php _e('Send Comment to Twitter', 'tp'); ?></label>');
 				
 				<?php } ?>
 			}
@@ -370,8 +370,8 @@ function tp_comm_get_display() {
 		echo '<div id="tw-user">'.
 			 '<img src="http://api.twitter.com/1/users/profile_image/'.$tw->screen_name.'?size=bigger" width="96" height="96" id="tw-avatar" class="avatar" />'.
 			 '<h3 id="tw-msg">Hi '.$tw->name.'!</h3>'.
-			 '<p>'.__('You are connected with your Twitter account.').'</p>'.
-			 apply_filters('tp_user_logout','<a href="?twitter-logout=1" id="tw-logout">'.__('Logout').'</a>').
+			 '<p>'.__('You are connected with your Twitter account.', 'tp').'</p>'.
+			 apply_filters('tp_user_logout','<a href="?twitter-logout=1" id="tw-logout">'.__('Logout', 'tp').'</a>').
 			 '</div>';
 		exit;
 	}
@@ -499,7 +499,7 @@ function tp_login_profile_page($profile) {
 ?>
 	<table class="form-table">
 		<tr>
-			<th><label><?php _e('Twitter Connect'); ?></label></th>
+			<th><label><?php _e('Twitter Connect', 'tp'); ?></label></th>
 <?php
 	$twuid = get_usermeta($profile->ID, 'twuid');
 	if (empty($twuid)) { 
@@ -509,10 +509,10 @@ function tp_login_profile_page($profile) {
 	</table>
 	<?php	
 	} else { ?>
-		<td><p><?php _e('Connected as '); ?>
+		<td><p><?php _e('Connected as ', 'tp'); ?>
 		<img src='http://api.twitter.com/1/users/profile_image/<?php echo $twuid; ?>?size=bigger' width='32' height='32' />
 		<a href='http://twitter.com/<?php echo $twuid; ?>'><?php echo $twuid; ?></a>
-		<input type="button" class="button-primary" value="<?php _e('Disconnect'); ?>" onclick="tp_login_disconnect(); return false;" />
+		<input type="button" class="button-primary" value="<?php _e('Disconnect', 'tp'); ?>" onclick="tp_login_disconnect(); return false;" />
 		<script type="text/javascript">
 		function tp_login_disconnect() {
 			var ajax_url = '<?php echo admin_url("admin-ajax.php"); ?>';
@@ -580,7 +580,7 @@ function tp_login_check($user) {
 		} else {
 			do_action('tp_login_new_tw_user',$tw); // hook for creating new users if desired
 			global $error;
-			$error = __('<strong>Error</strong>: Twitter user not recognized.');
+			$error = __('<strong>Error</strong>: Twitter user not recognized.', 'tp');
 		}
 	}
 	return $user;
@@ -685,17 +685,17 @@ add_filter('the_content', 'tweetbutton_automatic', 30);
 // add the admin sections to the tp page
 add_action('admin_init', 'tweetbutton_admin_init');
 function tweetbutton_admin_init() {
-	add_settings_section('tweetbutton', __('Tweet Button Settings'), 'tweetbutton_section_callback', 'tp');
-	add_settings_field('tweetbutton_source', __('Tweet Source'), 'tweetbutton_source', 'tp', 'tweetbutton');
-	add_settings_field('tweetbutton_position', __('Tweet Button Position'), 'tweetbutton_position', 'tp', 'tweetbutton');
-	add_settings_field('tweetbutton_style', __('Tweet Button Style'), 'tweetbutton_style', 'tp', 'tweetbutton');
-	add_settings_field('tweetbutton_related', __('Tweet Button related'), 'tweetbutton_related', 'tp', 'tweetbutton');
-	add_settings_field('tweetbutton_css', __('Tweet Button CSS'), 'tweetbutton_css', 'tp', 'tweetbutton');
-	add_settings_field('tweetbutton_singleonly', __('Tweet Button Single Pages Only'), 'tweetbutton_singleonly', 'tp', 'tweetbutton');
+	add_settings_section('tweetbutton', __('Tweet Button Settings', 'tp'), 'tweetbutton_section_callback', 'tp');
+	add_settings_field('tweetbutton_source', __('Tweet Source', 'tp'), 'tweetbutton_source', 'tp', 'tweetbutton');
+	add_settings_field('tweetbutton_position', __('Tweet Button Position', 'tp'), 'tweetbutton_position', 'tp', 'tweetbutton');
+	add_settings_field('tweetbutton_style', __('Tweet Button Style', 'tp'), 'tweetbutton_style', 'tp', 'tweetbutton');
+	add_settings_field('tweetbutton_related', __('Tweet Button related', 'tp'), 'tweetbutton_related', 'tp', 'tweetbutton');
+	add_settings_field('tweetbutton_css', __('Tweet Button CSS', 'tp'), 'tweetbutton_css', 'tp', 'tweetbutton');
+	add_settings_field('tweetbutton_singleonly', __('Tweet Button Single Pages Only', 'tp'), 'tweetbutton_singleonly', 'tp', 'tweetbutton');
 }
 
 function tweetbutton_section_callback() {
-	echo '<p>'.__('Choose where you want the Tweetbutton button to add the button in your content.').'</p>';
+	echo '<p>'.__('Choose where you want the Tweetbutton button to add the button in your content.', 'tp').'</p>';
 }
 
 function tweetbutton_source() {
@@ -720,9 +720,9 @@ function tweetbutton_style() {
 	if (!$options['tweetbutton_style']) $options['tweetbutton_style'] = 'manual';
 	?>
 	<select name="tp_options[tweetbutton_style]" id="select_tweetbutton_position">
-	<option value="none" <?php selected('none', $options['tweetbutton_style']); ?>><?php _e('None'); ?></option>
-	<option value="horizontal" <?php selected('horizontal', $options['tweetbutton_style']); ?>><?php _e('Horizonal'); ?></option>
-	<option value="vertical" <?php selected('vertical', $options['tweetbutton_style']); ?>><?php _e('Vertical'); ?></option>
+	<option value="none" <?php selected('none', $options['tweetbutton_style']); ?>><?php _e('None', 'tp'); ?></option>
+	<option value="horizontal" <?php selected('horizontal', $options['tweetbutton_style']); ?>><?php _e('Horizonal', 'tp'); ?></option>
+	<option value="vertical" <?php selected('vertical', $options['tweetbutton_style']); ?>><?php _e('Vertical', 'tp'); ?></option>
 	</select>
 <?php
 }
