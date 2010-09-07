@@ -3,7 +3,7 @@
 Plugin Name: TP
 Description: TweetPress, All the tools you need to integrate your wordpress and twitter.
 Author: Louy
-Version: 0.2
+Version: 0.3
 Author URI: http://louyblog.wordpress.com
 Text Domain: tp
 Domain Path: /po
@@ -21,7 +21,7 @@ load_plugin_textdomain( 'tp', false, dirname( plugin_basename( __FILE__ ) ) . '/
  * TweetPress Core:
  */
 
-define('TP_VERSION', '0.2');
+define('TP_VERSION', '0.3');
 
 add_action('init','tp_init');
 function tp_init() {
@@ -56,6 +56,23 @@ function tp_activation_check(){
 		deactivate_plugins(basename(__FILE__)); // Deactivate ourself
 		wp_die("Sorry, TweetPress requires PHP 5 or higher. Ask your host how to enable PHP 5 as the default on your servers.");
 	}
+	add_option('tp_options', array(
+		'consumer_key' => defined('TWITTER_CONSUMER_KEY') ? TWITTER_CONSUMER_KEY : '',
+		'consumer_secret' => defined('TWITTER_CONSUMER_SECRET') ? TWITTER_CONSUMER_SECRET : '',
+		'allow_comments' => false,
+		'comm_text' => '',
+		'tweetbutton_source' => 'l0uy',
+		'tweetbutton_position' => 'manual',
+		'tweetbutton_style' => 'vertical',
+		'tweetbutton_css' => '',
+		'tweetbutton_singleonly' => true,
+		'autotweet_flag' => 0,
+		'publish_text' => __('%title% %url%[ifauthor] by %author%[/ifauthor]'),
+		'autotweet_name' => '',
+		'autotweet_token' => '',
+		'autotweet_secret' => '',
+	
+	));
 }
 register_activation_hook(__FILE__, 'tp_activation_check');
 
@@ -158,7 +175,7 @@ function oauth_confirm() {
 // get the user credentials from twitter
 function tp_get_credentials($force_check = false) {
 	
-	if(!$force_check && !$_SESSION['tw-connected']) return;
+	if(!$force_check && !$_SESSION['tw-connected']) return false;
 	
 	// cache the results in the session so we don't do this over and over
 	if (!$force_check && $_SESSION['tp_credentials']) return $_SESSION['tp_credentials']; 
@@ -171,18 +188,18 @@ function tp_get_credentials($force_check = false) {
 // json is assumed for this, so don't add .xml or .json to the request URL
 function tp_do_request($url, $args = array(), $type = NULL) {
 	
-	if ($args['acc_token']) {
+	if (isset($args['acc_token'])) {
 		$acc_token = $args['acc_token'];
 		unset($args['acc_token']);
 	} else {
-		$acc_token = $_SESSION['tp_acc_token'];
+		$acc_token = isset($_SESSION['tp_acc_token']) ? $_SESSION['tp_acc_token'] : false;
 	}
 	
-	if ($args['acc_secret']) {
+	if (isset($args['acc_secret'])) {
 		$acc_secret = $args['acc_secret'];
 		unset($args['acc_secret']);
 	} else {
-		$acc_secret = $_SESSION['tp_acc_secret'];
+		$acc_secret = isset($_SESSION['tp_acc_secret']) ? $_SESSION['tp_acc_secret'] : false;
 	}
 	
 	$options = tp_options();
@@ -213,7 +230,7 @@ function tp_section_text() {
 <li><?php _e('Go to this link to create your application: <a target="_blank" href="http://dev.twitter.com/apps/new">Twitter: Register an Application</a>', 'tp'); ?></li>
 <li><?php _e('Important Settings:', 'tp'); ?><ol>
 <li><?php _e('Application Type must be set to "Browser".', 'tp'); ?></li>
-<li><?php printf(__('Callback URL must be set to "%s".', 'tp'), get_bloginfo('home')); ?></li>
+<li><?php printf(__('Callback URL must be set to "%s".', 'tp'), get_bloginfo('url')); ?></li>
 <li><?php _e('Default Access type must be set to "Read and Write".', 'tp'); ?></li>
 <li><?php _e('Use Twitter for login must be checked (enabled).', 'tp'); ?></li>
 </ol>
@@ -228,7 +245,7 @@ function tp_section_text() {
 function tp_get_connect_button($action='', $type='authenticate', $image ='Sign-in-with-Twitter-darker') {
 	$image = apply_filters('tp_connect_button_image', $image, $action, $type);
 	$imgsrc = apply_filters('tp_connect_button_image_src', plugins_url('/images/'.$image.'.png', __FILE__), $image, $action, $type);
-	return '<a href="'.esc_attr(get_bloginfo('home').'/?oauth_start=1&tpaction='.urlencode($action).'&loc='.urlencode(tp_get_current_url()).'&type='.urlencode($type)).'" title="'.__('Sign in with Twitter').'">'.
+	return '<a href="'.esc_attr(get_bloginfo('url').'/?oauth_start=1&tpaction='.urlencode($action).'&loc='.urlencode(tp_get_current_url()).'&type='.urlencode($type)).'" title="'.__('Sign in with Twitter').'">'.
 		   '<img src="'.$imgsrc.'" alt="'.__('Sign in with Twitter').'" style="border:none;" />'.
 		   '</a>';
 }
@@ -290,6 +307,13 @@ function anywhereloader() {
 /**
  * TweetPress Comments:
  */
+add_action('admin_init','tp_comm_error_check');
+function tp_comm_error_check() {
+	if ( get_option( 'comment_registration' ) && tp_options('allow_comments') ) {
+		add_action('admin_notices', create_function( '', "echo '<div class=\"error\"><p>".__('TweetPress Comment function doesn\'t work with sites that require registration to comment.')."</p></div>';" ) );
+	}
+}
+
 add_action('admin_init', 'tp_comm_admin_init');
 function tp_comm_admin_init() {
 	add_settings_section('tp_comm', __('Comment Settings', 'tp'), 'tp_comm_section_callback', 'tp');
@@ -425,18 +449,25 @@ function tp_comm_send_to_twitter() {
 	}
 }
 
-
-// this bit is to allow the user to add the relevant comments login button to the comments form easily
-// user need only stick a do_action('alt_comment_login'); wherever he wants the button to display
 function tp_comm_login_button() {
 	echo '<p id="tw-connect">'.tp_get_connect_button('comment').'</p>';
 }
 
-function comment_user_details_begin() { echo '<div id="comment-user-details">'; }
-
-function comment_user_details_end() { echo '</div>'; }
+if( !function_exists('alt_comment_login') ) {
+	
+	function alt_comment_login() {
+		echo '<div id="alt-comment-login">';
+		do_action('alt_comment_login');
+		echo '</div>';
+	}
+	
+	function comment_user_details_begin() { echo '<div id="comment-user-details">'; }
+	
+	function comment_user_details_end() { echo '</div>'; }
+}
 
 // generate avatar code for Twitter user comments
+add_filter('get_avatar','tp_comm_avatar', 10, 5);
 function tp_comm_avatar($avatar, $id_or_email, $size = '96', $default = '', $alt = false) {
 	// check to be sure this is for a comment
 	if ( !is_object($id_or_email) || !isset($id_or_email->comment_ID) || $id_or_email->user_id) 
@@ -481,10 +512,10 @@ if( tp_options('allow_comment') ) {
 	add_action('wp_ajax_nopriv_tp_comm_get_display', 'tp_comm_get_display');
 	add_action('init','tp_comm_logout');
 	add_action('comment_post','tp_comm_send_to_twitter');
-	add_action('comment_form_before_fields', 'tp_comm_login_button',10,0); // WP 3.0 only
-	add_action('comment_form_before_fields', 'comment_user_details_begin',1,0);
+	add_action('comment_form_before_fields', 'alt_comment_login',1,0);
+	add_action('alt_comment_login', 'tp_comm_login_button');
+	add_action('comment_form_before_fields', 'comment_user_details_begin',2,0);
 	add_action('comment_form_after_fields', 'comment_user_details_end',20,0);
-	add_filter('get_avatar','tp_comm_avatar', 10, 5);
 	add_action('comment_post','tp_comm_add_meta', 10, 1);
 	add_filter('pre_comment_on_post','tp_comm_fill_in_fields');
 }
@@ -622,10 +653,15 @@ function get_tweetbutton($args='') {
 	$options = tp_options();
 	if ($options['tweetbutton_source']) $source = $options['tweetbutton_source'];
 	if ($options['tweetbutton_style']) $style = $options['tweetbutton_style'];
-	if ($options['tweetbutton_related']) $related = $options['tweetbutton_related'];
-	
+	//if ($options['tweetbutton_related']) $related = $options['tweetbutton_related'];
+	/*
 	if( get_the_author_meta('twuid') ) {
 		$source = get_the_author_meta('twuid');
+	}
+	*/
+	$related = $source;
+	if( get_the_author_meta('twuid') ) {
+		$related .= ':'.get_the_author_meta('twuid');
 	}
 	
 	$url = esc_attr(get_permalink($id));
@@ -691,7 +727,7 @@ function tweetbutton_admin_init() {
 	add_settings_field('tweetbutton_source', __('Tweet Source', 'tp'), 'tweetbutton_source', 'tp', 'tweetbutton');
 	add_settings_field('tweetbutton_position', __('Tweet Button Position', 'tp'), 'tweetbutton_position', 'tp', 'tweetbutton');
 	add_settings_field('tweetbutton_style', __('Tweet Button Style', 'tp'), 'tweetbutton_style', 'tp', 'tweetbutton');
-	add_settings_field('tweetbutton_related', __('Tweet Button related', 'tp'), 'tweetbutton_related', 'tp', 'tweetbutton');
+	//add_settings_field('tweetbutton_related', __('Tweet Button related', 'tp'), 'tweetbutton_related', 'tp', 'tweetbutton');
 	add_settings_field('tweetbutton_css', __('Tweet Button CSS', 'tp'), 'tweetbutton_css', 'tp', 'tweetbutton');
 	add_settings_field('tweetbutton_singleonly', __('Tweet Button Single Pages Only', 'tp'), 'tweetbutton_singleonly', 'tp', 'tweetbutton');
 }
@@ -728,14 +764,14 @@ function tweetbutton_style() {
 	</select>
 <?php
 }
-
+/*
 function tweetbutton_related() {
 	$options = tp_options();
 	if (!$options['tweetbutton_related']) $options['tweetbutton_related'] = '';
 	echo "<input type='text' id='tweetbutton-related' name='tp_options[tweetbutton_related]' value='{$options['tweetbutton_related']}' size='40' /> Users that the person will be suggested to follow. Max 2, separate with colon. Example l0uy:ardroid";
 
 }
-
+*/
 function tweetbutton_css() {
 	$options = tp_options();
 	if (!$options['tweetbutton_css']) $options['tweetbutton_css'] = '';
@@ -763,13 +799,13 @@ function tweetbutton_validate_options($input) {
 		// only alnum and underscore allowed in twitter names
 		$input['tweetbutton_source'] = preg_replace('/[^a-zA-Z0-9_\s]/', '', $input['tweetbutton_source']);
 	}
-
+/*
 	if (!$input['tweetbutton_related']) $input['tweetbutton_related'] = '';
 	else {
 		// only alnum and underscore allowed in twitter names
 		$input['tweetbutton_related'] = preg_replace('/[^a-zA-Z0-9_\s:]/', '', $input['tweetbutton_related']);
 	}
-
+*/
 	if (!$input['tweetbutton_css']) $input['tweetbutton_css'] = '';
 	else {
 		// only alnum and underscore allowed in twitter names
@@ -785,7 +821,7 @@ function tweetbutton_validate_options($input) {
 }
 
 /**
- * TweetPress Publish
+ * TweetPress Publish:
  */
 
 // add the meta boxes
@@ -814,7 +850,7 @@ function tp_publish_auto_callback() {
 	<p><label><?php _e('Automatically Tweet on Publish:'); ?> <input type="checkbox" name="tp_options[autotweet_flag]" value="1" <?php checked('1', $options['autotweet_flag']); ?> /></label></p>
 	<?php 
 	$tw = tp_get_credentials(true);
-	if ($tw->screen_name) echo "<p>Currently logged in as: <strong>{$tw->screen_name}</strong></p>";
+	if (isset($tw->screen_name)) echo "<p>Currently logged in as: <strong>{$tw->screen_name}</strong></p>";
 	
 	if ($options['autotweet_name']) {
 		echo "<p>Autotweet set to Twitter User: <strong>{$options['autotweet_name']}</strong></p>";
