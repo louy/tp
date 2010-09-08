@@ -67,7 +67,7 @@ function tp_activation_check(){
 		'tweetbutton_css' => '',
 		'tweetbutton_singleonly' => true,
 		'autotweet_flag' => 0,
-		'publish_text' => __('%title% %url%[ifauthor] by %author%[/ifauthor]'),
+		'publish_text' => __('%title% %url%[ifauthor] by %author%[/ifauthor]', 'tp'),
 		'autotweet_name' => '',
 		'autotweet_token' => '',
 		'autotweet_secret' => '',
@@ -221,7 +221,7 @@ function tp_section_text() {
 <p><?php _e('To connect your site to Twitter, you will need a Twitter Application. If you have already created one, please insert your Consumer Key and Consumer Secret below.', 'tp'); ?></p>
 <p><strong><?php _e('Can&#39;t find your key?', 'tp'); ?></strong></p>
 <ol>
-<li><?php _e('Get a list of your applications from here: <a target="_blank" href="http://dev.twitter.com/apps">Twitter Application List', 'tp'); ?></a></li>
+<li><?php _e('Get a list of your applications from here: <a target="_blank" href="http://dev.twitter.com/apps">Twitter Application List</a>', 'tp'); ?></li>
 <li><?php _e('Select the application you want, then copy and paste the Consumer Key and Consumer Secret from there.', 'tp'); ?></li>
 </ol>
 
@@ -232,7 +232,6 @@ function tp_section_text() {
 <li><?php _e('Application Type must be set to "Browser".', 'tp'); ?></li>
 <li><?php printf(__('Callback URL must be set to "%s".', 'tp'), get_bloginfo('url')); ?></li>
 <li><?php _e('Default Access type must be set to "Read and Write".', 'tp'); ?></li>
-<li><?php _e('Use Twitter for login must be checked (enabled).', 'tp'); ?></li>
 </ol>
 </li>
 <li><?php _e('The other application fields can be set up any way you like.', 'tp'); ?></li>
@@ -245,8 +244,8 @@ function tp_section_text() {
 function tp_get_connect_button($action='', $type='authenticate', $image ='Sign-in-with-Twitter-darker') {
 	$image = apply_filters('tp_connect_button_image', $image, $action, $type);
 	$imgsrc = apply_filters('tp_connect_button_image_src', plugins_url('/images/'.$image.'.png', __FILE__), $image, $action, $type);
-	return '<a href="'.esc_attr(get_bloginfo('url').'/?oauth_start=1&tpaction='.urlencode($action).'&loc='.urlencode(tp_get_current_url()).'&type='.urlencode($type)).'" title="'.__('Sign in with Twitter').'">'.
-		   '<img src="'.$imgsrc.'" alt="'.__('Sign in with Twitter').'" style="border:none;" />'.
+	return '<a href="'.esc_attr(get_bloginfo('url').'/?oauth_start=1&tpaction='.urlencode($action).'&loc='.urlencode(tp_get_current_url()).'&type='.urlencode($type)).'" title="'.__('Sign in with Twitter', 'tp').'">'.
+		   '<img src="'.$imgsrc.'" alt="'.__('Sign in with Twitter', 'tp').'" style="border:none;" />'.
 		   '</a>';
 }
 
@@ -261,13 +260,13 @@ function tp_get_current_url() {
 function tp_setting_consumer_key() {
 	if (defined('TWITTER_CONSUMER_KEY')) return;
 	$options = tp_options();
-	echo "<input type='text' id='tpconsumerkey' name='tp_options[consumer_key]' value='{$options['consumer_key']}' size='40' /> (required)";	
+	echo "<input type='text' id='tpconsumerkey' name='tp_options[consumer_key]' value='{$options['consumer_key']}' size='40' /> " . __('(required)', 'tp');	
 }
 
 function tp_setting_consumer_secret() {
 	if (defined('TWITTER_CONSUMER_SECRET')) return;
 	$options = tp_options();
-	echo "<input type='text' id='tpconsumersecret' name='tp_options[consumer_secret]' value='{$options['consumer_secret']}' size='40' /> (required)";	
+	echo "<input type='text' id='tpconsumersecret' name='tp_options[consumer_secret]' value='{$options['consumer_secret']}' size='40' /> " . __('(required)', 'tp');
 }
 
 // this will override the main options if they are pre-defined
@@ -310,7 +309,7 @@ function anywhereloader() {
 add_action('admin_init','tp_comm_error_check');
 function tp_comm_error_check() {
 	if ( get_option( 'comment_registration' ) && tp_options('allow_comments') ) {
-		add_action('admin_notices', create_function( '', "echo '<div class=\"error\"><p>".__('TweetPress Comment function doesn\'t work with sites that require registration to comment.')."</p></div>';" ) );
+		add_action('admin_notices', create_function( '', "echo '<div class=\"error\"><p>".__('TweetPress Comment function doesn\'t work with sites that require registration to comment.', 'tp')."</p></div>';" ) );
 	}
 }
 
@@ -739,17 +738,17 @@ function tweetbutton_section_callback() {
 function tweetbutton_source() {
 	$options = tp_options();
 	if (!$options['tweetbutton_source']) $options['tweetbutton_source'] = 'l0uy';
-	echo "<input type='text' id='tweetbutton-source' name='tp_options[tweetbutton_source]' value='{$options['tweetbutton_source']}' size='40' /> (Username that appears to be RT'd)";
+	echo "<input type='text' id='tweetbutton-source' name='tp_options[tweetbutton_source]' value='{$options['tweetbutton_source']}' size='40' /> " . __('(Username that appears to be RT&#39;d)', 'tp');
 }
 
 function tweetbutton_position() {
 	$options = tp_options();
 	if (!$options['tweetbutton_position']) $options['tweetbutton_position'] = 'manual';
 	?>
-	<p><label><input type="radio" name="tp_options[tweetbutton_position]" value="before" <?php checked('before', $options['tweetbutton_position']); ?> /> Before the content of your post</label></p>
-	<p><label><input type="radio" name="tp_options[tweetbutton_position]" value="after" <?php checked('after', $options['tweetbutton_position']); ?> /> After the content of your post</label></p>
-	<p><label><input type="radio" name="tp_options[tweetbutton_position]" value="both" <?php checked('both', $options['tweetbutton_position']); ?> /> Before AND After the content of your post </label></p>
-	<p><label><input type="radio" name="tp_options[tweetbutton_position]" value="manual" <?php checked('manual', $options['tweetbutton_position']); ?> /> Manually add the button to your theme or posts (use the tweetbutton_button function in your theme, or the [tweetbutton] shortcode in your posts)</label></p>
+	<p><label><input type="radio" name="tp_options[tweetbutton_position]" value="before" <?php checked('before', $options['tweetbutton_position']); ?> /> <?php _e('Before the content of your post', 'tp'); ?></label></p>
+	<p><label><input type="radio" name="tp_options[tweetbutton_position]" value="after" <?php checked('after', $options['tweetbutton_position']); ?> /> <?php _e('After the content of your post', 'tp'); ?></label></p>
+	<p><label><input type="radio" name="tp_options[tweetbutton_position]" value="both" <?php checked('both', $options['tweetbutton_position']); ?> /> <?php _e('Before AND After the content of your post', 'tp'); ?></label></p>
+	<p><label><input type="radio" name="tp_options[tweetbutton_position]" value="manual" <?php checked('manual', $options['tweetbutton_position']); ?> /> <?php _e('Manually add the button to your theme or posts (use the tweetbutton_button function in your theme, or the [tweetbutton] shortcode in your posts)', 'tp'); ?></label></p>
 <?php 
 }
 
@@ -775,13 +774,13 @@ function tweetbutton_related() {
 function tweetbutton_css() {
 	$options = tp_options();
 	if (!$options['tweetbutton_css']) $options['tweetbutton_css'] = '';
-	echo "<input type='text' id='tweetbutton-css' name='tp_options[tweetbutton_css]' value='{$options['tweetbutton_css']}' size='40' /> the css style of the tweet button.";
+	echo "<input type='text' id='tweetbutton-css' name='tp_options[tweetbutton_css]' value='{$options['tweetbutton_css']}' size='40' /> " . __('the css style of the tweet button.', 'tp');
 }
 
 function tweetbutton_singleonly() {
 	$options = tp_options();
 	if (!$options['tweetbutton_singleonly']) $options['tweetbutton_singleonly'] = true;
-	echo "<input type='checkbox' id='tweetbutton-singleonly' name='tp_options[tweetbutton_singleonly]' value='yes'".checked($options['tweetbutton_singleonly'],true,false)." /> show tweet button only on single pages?.";
+	echo "<input type='checkbox' id='tweetbutton-singleonly' name='tp_options[tweetbutton_singleonly]' value='yes'".checked($options['tweetbutton_singleonly'],true,false)." /> " . __('show tweet button only on single pages?.', 'tp');
 }
 
 add_filter('tp_validate_options','tweetbutton_validate_options');
@@ -827,55 +826,55 @@ function tweetbutton_validate_options($input) {
 // add the meta boxes
 add_action('admin_menu', 'tp_publish_meta_box_add');
 function tp_publish_meta_box_add() {
-	add_meta_box('tp-publish-div', __('Twitter Publisher'), 'tp_publish_meta_box', 'post', 'side');
+	add_meta_box('tp-publish-div', __('Twitter Publisher', 'tp'), 'tp_publish_meta_box', 'post', 'side');
 }
 
 // add the admin sections to the tp page
 add_action('admin_init', 'tp_publish_admin_init');
 function tp_publish_admin_init() {
-	add_settings_section('tp_publish', __('Publish Settings'), 'tp_publish_section_callback', 'tp');
-	add_settings_field('tp_publish_flags', __('Automatic Publishing'), 'tp_publish_auto_callback', 'tp', 'tp_publish');
-	add_settings_field('tp_publish_text', __('Publish Tweet Text'), 'tp_publish_text', 'tp', 'tp_publish');
+	add_settings_section('tp_publish', __('Publish Settings', 'tp'), 'tp_publish_section_callback', 'tp');
+	add_settings_field('tp_publish_flags', __('Automatic Publishing', 'tp'), 'tp_publish_auto_callback', 'tp', 'tp_publish');
+	add_settings_field('tp_publish_text', __('Publish Tweet Text', 'tp'), 'tp_publish_text', 'tp', 'tp_publish');
 	wp_enqueue_script('jquery');
 }
 
 function tp_publish_section_callback() {
-	echo "<p>Settings for the Publish function. The manual Twitter Publishing buttons can be found on the Edit Post screen, after you publish a post. If you can't find them, try scrolling down or seeing if you have the box disabled in the Options dropdown.</p>";
+	echo '<p>' . __('Settings for the Publish function. The manual Twitter Publishing buttons can be found on the Edit Post screen, after you publish a post. If you can&#39;t find them, try scrolling down or seeing if you have the box disabled in the Options dropdown.', 'tp') . '</p>';
 }
 
 function tp_publish_auto_callback() {
 	$options = tp_options();
 	if (!$options['autotweet_flag']) $options['autotweet_flag'] = false;
 	?>
-	<p><label><?php _e('Automatically Tweet on Publish:'); ?> <input type="checkbox" name="tp_options[autotweet_flag]" value="1" <?php checked('1', $options['autotweet_flag']); ?> /></label></p>
+	<p><label><?php _e('Automatically Tweet on Publish:', 'tp'); ?> <input type="checkbox" name="tp_options[autotweet_flag]" value="1" <?php checked('1', $options['autotweet_flag']); ?> /></label></p>
 	<?php 
 	$tw = tp_get_credentials(true);
-	if (isset($tw->screen_name)) echo "<p>Currently logged in as: <strong>{$tw->screen_name}</strong></p>";
+	if (isset($tw->screen_name)) echo "<p>" . sprintf(__('Currently logged in as: <strong>%s</strong>', 'tp'), $tw->screen_name) . "</p>";
 	
 	if ($options['autotweet_name']) {
-		echo "<p>Autotweet set to Twitter User: <strong>{$options['autotweet_name']}</strong></p>";
+		echo "<p>" . sprintf(__('Autotweet set to Twitter User: <strong>%s</strong>', 'tp'), $options['autotweet_name']) . "</p>";
 	} else {
-		echo "<p>Autotweet not set to a Twitter user.</p>";
+		echo "<p>" . __('Autotweet not set to a Twitter user.', 'tp') . "</p>";
 	}
-	echo '<p>To auto-publish new posts to any Twitter account, click this button and then log into that account to give the plugin access.</p><p>Authenticate for auto-tweeting: '.tp_get_connect_button('publish_preauth', 'authorize').'</p>';
-	echo '<p>Afterwards, you can use this button to log back into your own normal account, if you are posting to a different account than your normal one. </p><p>Normal authentication: '.tp_get_connect_button('', 'authorize').'</p>';
+	echo '<p>' . __('To auto-publish new posts to any Twitter account, click this button and then log into that account to give the plugin access.', 'tp') . '</p><p>' . sprintf(__('Authenticate for auto-tweeting: %s', 'tp'), tp_get_connect_button('publish_preauth', 'authorize')) . '</p>';
+	echo '<p>' . __('Afterwards, you can use this button to log back into your own normal account, if you are posting to a different account than your normal one.', 'tp') . '</p><p>' . sprintf(__('Normal authentication: %s', 'tp'), tp_get_connect_button('', 'authorize')) . '</p>';
 }
 
 function tp_publish_text() {
 	$options = tp_options();
-	if (!$options['publish_text']) $options['publish_text'] = __('%title% %url%[ifauthor] by %author%[/ifauthor]');
+	if (!$options['publish_text']) $options['publish_text'] = __('%title% %url%[ifauthor] by %author%[/ifauthor]', 'tp');
 
 	echo "<input type='text' name='tp_options[publish_text]' value='{$options['publish_text']}' size='40' /><br />";
-	echo '<p>Use %title% for the post title.</p>';
-	echo '<p>Use %url% for the post link (or shortlink).</p>';
-	echo '<p>Use %author% for the author twitter username (@l0uy for example).</p>';
-	echo '<p>Use [ifauthor][/ifauthor] to check if the author have a twitter account.</p>';
+	echo '<p>' . __('Use %title% for the post title.', 'tp') . '</p>';
+	echo '<p>' . __('Use %url% for the post link (or shortlink).', 'tp') . '</p>';
+	echo '<p>' . __('Use %author% for the author twitter username (@l0uy for example).', 'tp') . '</p>';
+	echo '<p>' . __('Use [ifauthor][/ifauthor] to check if the author have a twitter account.', 'tp') . '</p>';
 }
 
 add_action('tp_publish_preauth','tp_publish_preauth');
 function tp_publish_preauth() {
 	if ( ! current_user_can('manage_options') )
-		wp_die(__('You do not have sufficient permissions to manage options for this blog.'));
+		wp_die(__('You do not have sufficient permissions to manage options for this blog.', 'tp'));
 
 	$tw = tp_get_credentials(true);
 
@@ -895,12 +894,12 @@ function tp_publish_meta_box( $post ) {
 	$options = tp_options();
 	
 	if ($post->post_status == 'private') {
-		echo '<p>'.__('Why would you put private posts on Twitter, for all to see?').'</p>';
+		echo '<p>'.__('Why would you put private posts on Twitter, for all to see?', 'tp').'</p>';
 		return;
 	}
 	
 	if ($post->post_status !== 'publish') {
-		echo '<p>'.__('After publishing the post, you can send it to Twitter from here.').'</p>';
+		echo '<p>'.__('After publishing the post, you can send it to Twitter from here.', 'tp').'</p>';
 		return;
 	}
 	
@@ -911,7 +910,7 @@ function tp_publish_meta_box( $post ) {
   tbox['height'] = 100;
   tbox['width'] = jQuery('#tp-manual-tweetbox').width();
   tbox['defaultContent'] = <?php echo json_encode(tp_get_default_tweet($post->ID)); ?>;
-  tbox['label'] = '<?php __('Tweet this:'); ?>';
+  tbox['label'] = '<?php __('Tweet this:', 'tp'); ?>';
   twttr.anywhere(function (T) {
     T("#tp-manual-tweetbox").tweetBox(tbox);
   });
