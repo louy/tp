@@ -4,7 +4,7 @@ Author URL: http://louyblog.wordpress.com/
 Tags: twitter, oauth, login, tweet, tweetbutton, comment, publish, connect
 Requires at least: 3.0
 Tested up to: 3.0.1
-Stable tag: 0.2
+Stable tag: 0.3
 
 All the tools you need to integrate your wordpress and twitter.
 
@@ -12,7 +12,18 @@ All the tools you need to integrate your wordpress and twitter.
 
 TweetPress, gives you all the tools you need to integrate your wordpress and twitter... based on the "Simple Twitter Connect" plugin, but highly customizable. 
 
+= Key Features =
+
+* Allow your visitors to comment using their twitter ids
+* Adds a tweet button to your posts, so your visitors can share your content.
+* Allow your blog users to sign in with their twitter ids. one click signin!
+* Automatically publish new posts to a twitter account.
+
 == Changelog ==
+
+= 0.3 =
+* plugin automatically sets related twitter usernames to the source and post author if available.
+* the tweetbutton source is now the website twitter not the author's
 
 = 0.2 =
 * adding the "publish" function.
