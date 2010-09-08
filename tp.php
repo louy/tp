@@ -225,7 +225,7 @@ function tp_section_text() {
 <li><?php _e('Select the application you want, then copy and paste the Consumer Key and Consumer Secret from there.', 'tp'); ?></li>
 </ol>
 
-<p><strong><?php _e('Haven&#39;t created an application yet?</strong> Don&#39;t worry, it&#39;s easy!', 'tp'); ?></p>
+<p><?php _e('<strong>Haven&#39;t created an application yet?</strong> Don&#39;t worry, it&#39;s easy!', 'tp'); ?></p>
 <ol>
 <li><?php _e('Go to this link to create your application: <a target="_blank" href="http://dev.twitter.com/apps/new">Twitter: Register an Application</a>', 'tp'); ?></li>
 <li><?php _e('Important Settings:', 'tp'); ?><ol>
