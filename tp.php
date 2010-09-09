@@ -2,9 +2,10 @@
 /*
 Plugin Name: TP
 Description: TweetPress, All the tools you need to integrate your wordpress and twitter.
-Author: Louy
+Author: Louy Alakkad
 Version: 0.3
-Author URI: http://louyblog.wordpress.com
+Author URI: http://louyblog.wordpress.com/
+Plugin URL: http://l0uy.wordpress.com/tag/tp/
 Text Domain: tp
 Domain Path: /po
 */
