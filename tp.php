@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: TP
-Description: TweetPress, All the tools you need to integrate your wordpress and twitter.
+Plugin Name: TP - TweetPress
+Description: All the tools you need to integrate your wordpress and twitter.
 Author: Louy
-Version: 0.3
+Version: 0.4
 Author URI: http://louyblog.wordpress.com
 Text Domain: tp
 Domain Path: /po
@@ -20,8 +20,7 @@ load_plugin_textdomain( 'tp', false, dirname( plugin_basename( __FILE__ ) ) . '/
 /**
  * TweetPress Core:
  */
-
-define('TP_VERSION', '0.3');
+define('TP_VERSION', '0.4');
 
 add_action('init','tp_init');
 function tp_init() {
@@ -518,10 +517,10 @@ if( tp_options('allow_comment') ) {
 	add_action('comment_post','tp_comm_add_meta', 10, 1);
 	add_filter('pre_comment_on_post','tp_comm_fill_in_fields');
 }
+
 /**
  * TweetPress Login:
  */
- 
 // add the section on the user profile page
 add_action('profile_personal_options','tp_login_profile_page');
 
@@ -533,7 +532,7 @@ function tp_login_profile_page($profile) {
 		<tr>
 			<th><label><?php _e('Twitter Connect', 'tp'); ?></label></th>
 <?php
-	$twuid = get_usermeta($profile->ID, 'twuid');
+	$twuid = get_user_meta($profile->ID, 'twuid');
 	if (empty($twuid)) { 
 		?>
 			<td><p><?php echo tp_get_connect_button('login_connect'); ?></p></td>
@@ -570,7 +569,7 @@ add_action('wp_ajax_disconnect_twuid', 'tp_login_disconnect_twuid');
 function tp_login_disconnect_twuid() {
 	$user = wp_get_current_user();
 	
-	$twuid = get_usermeta($user->ID, 'twuid');
+	$twuid = get_user_meta($user->ID, 'twuid');
 	if ($twuid == $_POST['twuid']) {
 		delete_usermeta($user->ID, 'twuid');
 	}
@@ -594,7 +593,8 @@ function tp_login_connect() {
 add_action('login_form','tp_login_add_login_button');
 function tp_login_add_login_button() {
 	global $action;
-	if ($action == 'login') echo '<p id="tw-login" style="text-align: center;">'.tp_get_connect_button('login').'</p><br />';
+	$style = apply_filters('tp_login_button_style', ' style="text-align: center;"');
+	if ($action == 'login') echo '<p id="tw-login"'.$style.'>'.tp_get_connect_button('login').'</p><br />';
 }
 
 add_filter('authenticate','tp_login_check');
@@ -626,17 +626,12 @@ function tp_login_logout() {
 /**
  * TweetPress Tweet Button:
  */
-
 global $tweetbutton_defaults, $tweetbutton_is_displayed;
 $tweetbutton_defaults = array(
 	'id'=>0,
-	'style'=>'vertical',
-	'source'=>'',
-	'related'=>'',
-	'text'=>'', 
 );
 $tweetbutton_is_displayed = false;
-		
+
 /**
  * Simple tweet button
  *
@@ -646,7 +641,7 @@ $tweetbutton_is_displayed = false;
 function get_tweetbutton($args='') {
 	global $tweetbutton_defaults, $tweetbutton_is_displayed;
 	$tweetbutton_is_displayed = true;
-	$args = wp_parse_args($args, $tweetbutton_defaults);
+	$args = wp_parse_args($tweetbutton_defaults, $args);
 	extract($args);
 	
 	$options = tp_options();
@@ -822,7 +817,6 @@ function tweetbutton_validate_options($input) {
 /**
  * TweetPress Publish:
  */
-
 // add the meta boxes
 add_action('admin_menu', 'tp_publish_meta_box_add');
 function tp_publish_meta_box_add() {
@@ -992,3 +986,4 @@ function tp_publish_validate_options($input) {
 	
 	return $input;
 }
+
