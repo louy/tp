@@ -3,7 +3,7 @@
 Plugin Name: TP - TweetPress
 Description: All the tools you need to integrate your wordpress and twitter.
 Author: Louy
-Version: 0.4
+Version: 0.5
 Author URI: http://louyblog.wordpress.com
 Text Domain: tp
 Domain Path: /po
@@ -17,11 +17,11 @@ if you want to force the plugin to use a consumer key and secret, add your keys 
 // Load translations
 load_plugin_textdomain( 'tp', false, dirname( plugin_basename( __FILE__ ) ) . '/po/' );
 
+define('TP_VERSION', '0.5');
+
 /**
  * TweetPress Core:
  */
-define('TP_VERSION', '0.4');
-
 add_action('init','tp_init');
 function tp_init() {
 
@@ -33,8 +33,8 @@ function tp_init() {
 		$_SESSION['tw-connected'] = false;
 	
 	// fast check for authentication requests on plugin load.
-	if(isset($_GET['oauth_start'])) {
-		oauth_start();
+	if(isset($_GET['oauth']) && $_GET['oauth'] == 'twitter') {
+		tp_oauth_start();
 	}
 	if(isset($_GET['oauth_token'])) {
 		oauth_confirm();
@@ -123,7 +123,7 @@ function tp_options_page() {
 <?php
 }
 
-function oauth_start() {
+function tp_oauth_start() {
 	$options = tp_options();
 	if (empty($options['consumer_key']) || empty($options['consumer_secret'])) return false;
 	include_once "twitterOAuth.php";
@@ -243,9 +243,10 @@ function tp_section_text() {
 function tp_get_connect_button($action='', $type='authenticate', $image ='Sign-in-with-Twitter-darker') {
 	$image = apply_filters('tp_connect_button_image', $image, $action, $type);
 	$imgsrc = apply_filters('tp_connect_button_image_src', plugins_url('/images/'.$image.'.png', __FILE__), $image, $action, $type);
-	return '<a href="'.esc_attr(get_bloginfo('url').'/?oauth_start=1&tpaction='.urlencode($action).'&loc='.urlencode(tp_get_current_url()).'&type='.urlencode($type)).'" title="'.__('Sign in with Twitter', 'tp').'">'.
-		   '<img src="'.$imgsrc.'" alt="'.__('Sign in with Twitter', 'tp').'" style="border:none;" />'.
-		   '</a>';
+	return apply_filters('tp_get_connect_button', 
+		'<a href="'.esc_attr(get_bloginfo('url').'/?oauth=twitter&tpaction='.urlencode($action).'&loc='.urlencode(tp_get_current_url()).'&type='.urlencode($type)).'" title="'.__('Sign in with Twitter', 'tp').'">'.
+			'<img src="'.$imgsrc.'" alt="'.__('Sign in with Twitter', 'tp').'" style="border:none;" />'.
+		'</a>', $action, $type, $image);
 }
 
 function tp_get_current_url() {
@@ -987,3 +988,82 @@ function tp_publish_validate_options($input) {
 	return $input;
 }
 
+/**
+ * TweetPress Follow Button:
+ */
+function get_tp_follow_button($user) {
+	$ret = "<div id='twitter-follow-{$user}'></div>\n"
+	. '<script type="text/javascript">' ."\n"
+	. "	twttr.anywhere(function (twitter) {\n"
+	. " twitter('#twitter-follow-{$user}').followButton('{$user}')\n"
+	. "});\n"
+	.'</script>';
+	return $ret;
+}
+
+// output the button
+function tp_follow_button($user) {
+	echo get_tp_follow_button($user);
+}
+
+/**
+ * Twitter follow as a shortcode
+ *
+ * Example use: [twitterfollow user="l0uy"]
+ */
+function tp_follow_shortcode($atts) {
+	extract(shortcode_atts(array(
+		'user' => '',
+	), $atts));
+	return get_tp_follow_button($user);
+}
+add_shortcode('twitterfollow','tp_follow_shortcode');
+
+class TP_Follow_Widget extends WP_Widget {
+	function TP_Follow_Widget() {
+		$widget_ops = array('classname' => 'widget_tp-follow', 'description' => __('Twitter Follow Button'));
+		$this->WP_Widget('tp-follow', __('Twitter Follow Button'), $widget_ops);
+	}
+
+	function widget($args, $instance) {
+		extract( $args );
+		$title = apply_filters('widget_title', $instance['title']);
+		?>
+		<?php echo $before_widget; ?>
+		<?php if ( $title ) echo $before_title . $title . $after_title; ?>
+		<?php tp_follow_button($instance['user']); ?>
+		<?php echo $after_widget; ?>
+		<?php
+	}
+
+	function update($new_instance, $old_instance) {
+		$options = tp_options();
+		if (empty($options['autotweet_name'])) $defaultuser = '';
+		else $defaultuser = $options['autotweet_name'];
+		
+		$instance = $old_instance;
+		$new_instance = wp_parse_args( (array) $new_instance, array( 'title' => '', 'user' => $defaultuser) );
+		$instance['title'] = strip_tags($new_instance['title']);
+		$instance['user'] = strip_tags($new_instance['user']);
+		return $instance;
+	}
+
+	function form($instance) {
+		$options = get_option('tp_options');
+		if (empty($options['autotweet_name'])) $defaultuser = ''; 
+		else $defaultuser = $options['autotweet_name'];
+		
+		$instance = wp_parse_args( (array) $instance, array( 'title' => '', 'user' => $defaultuser) );
+		$title = strip_tags($instance['title']);
+		$user = strip_tags($instance['user']);
+		?>
+<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:'); ?> 
+<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" />
+</label></p>
+<p><label for="<?php echo $this->get_field_id('user'); ?>"><?php _e('Username:'); ?> 
+<input class="widefat" id="<?php echo $this->get_field_id('user'); ?>" name="<?php echo $this->get_field_name('user'); ?>" type="text" value="<?php echo $user; ?>" />
+</label></p>
+		<?php
+	}
+}
+add_action('widgets_init', create_function('', 'return register_widget("TP_Follow_Widget");'));
