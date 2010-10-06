@@ -373,6 +373,7 @@ function tp_comm_footer_script() {
 		var data = { action: 'tp_comm_get_display' }
 		jQuery.post(ajax_url, data, function(response) {
 			if (response != '0' && response != 0) {
+				jQuery('#alt-comment-login').hide();
 				jQuery('#comment-user-details').hide().after(response);
 				
 				<?php 
