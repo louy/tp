@@ -557,7 +557,7 @@ function tp_login_profile_page($profile) {
 		<tr>
 			<th><label><?php _e('Twitter Connect', 'tp'); ?></label></th>
 <?php
-	$twuid = get_user_meta($profile->ID, 'twuid');
+	$twuid = get_user_meta($profile->ID, 'twuid', true);
 	if (empty($twuid)) { 
 		?>
 			<td><p><?php echo tp_get_connect_button('login_connect'); ?></p></td>
@@ -594,7 +594,7 @@ add_action('wp_ajax_disconnect_twuid', 'tp_login_disconnect_twuid');
 function tp_login_disconnect_twuid() {
 	$user = wp_get_current_user();
 	
-	$twuid = get_user_meta($user->ID, 'twuid');
+	$twuid = get_user_meta($user->ID, 'twuid', true);
 	if ($twuid == $_POST['twuid']) {
 		delete_usermeta($user->ID, 'twuid');
 	}
