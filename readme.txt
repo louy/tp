@@ -23,6 +23,9 @@ TweetPress, gives you all the tools you need to integrate your wordpress and twi
 
 == Changelog ==
 
+= 1.0 =
+* now using the wp-oauth.php script http://gist.github.com/585267
+
 = 0.5 =
 * add follow button
 * some minor changes
