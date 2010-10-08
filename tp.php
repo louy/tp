@@ -267,7 +267,10 @@ function tp_get_connect_button($action='', $type='authenticate', $image ='Sign-i
 	$image = apply_filters('tp_connect_button_image', $image, $action, $type);
 	$imgsrc = apply_filters('tp_connect_button_image_src', plugins_url('/images/'.$image.'.png', __FILE__), $image, $action, $type);
 	return apply_filters('tp_get_connect_button', 
-		'<a href="'.esc_attr(get_bloginfo('url').'/?oauth=twitter&tpaction='.urlencode($action).'&loc='.urlencode(tp_get_current_url()).'&type='.urlencode($type)).'" title="'.__('Sign in with Twitter', 'tp').'">'.
+		'<a href="' . oauth_link('twitter', array(
+				'tpaction' => $action,
+				'loc' => tp_get_current_url(), 
+				'type' => $type) ) . '" title="'.__('Sign in with Twitter', 'tp').'">'.
 			'<img src="'.$imgsrc.'" alt="'.__('Sign in with Twitter', 'tp').'" style="border:none;" />'.
 		'</a>', $action, $type, $image);
 }
