@@ -3,14 +3,13 @@
 Plugin Name: TP - TweetPress
 Description: All the tools you need to integrate your wordpress and twitter.
 Author: Louy
-Version: 1.0
-Author URI: http://l0uy.com
+Version: 0.5
+Author URI: http://louyblog.wordpress.com
 Text Domain: tp
 Domain Path: /po
 */
 /*
-if you want to force the plugin to use a consumer key and secret,
-add your keys and copy the following 2 lines to your wp-config.php
+if you want to force the plugin to use a consumer key and secret, add your keys and uncomment the following two lines:
 */
 //define('TWITTER_CONSUMER_KEY', 'EnterYourKeyHere');
 //define('TWITTER_CONSUMER_SECRET', 'EnterYourSecretHere');
@@ -18,9 +17,7 @@ add your keys and copy the following 2 lines to your wp-config.php
 // Load translations
 load_plugin_textdomain( 'tp', false, dirname( plugin_basename( __FILE__ ) ) . '/po/' );
 
-define('TP_VERSION', '1.0');
-
-require_once 'wp-oauth.php';
+define('TP_VERSION', '0.5');
 
 /**
  * TweetPress Core:
@@ -34,14 +31,14 @@ function tp_init() {
 	
 	isset($_SESSION['tw-connected']) or 
 		$_SESSION['tw-connected'] = false;
-	/*
+	
 	// fast check for authentication requests on plugin load.
 	if(isset($_GET['oauth']) && $_GET['oauth'] == 'twitter') {
 		tp_oauth_start();
 	}
 	if(isset($_GET['oauth_token'])) {
-		tp_oauth_confirm();
-	}*/
+		oauth_confirm();
+	}
 }
 
 function tp_options($k=false) {
@@ -53,7 +50,7 @@ function tp_options($k=false) {
 }
 
 // require PHP 5
-function tp_activate(){
+function tp_activation_check(){
 	if (version_compare(PHP_VERSION, '5.0.0', '<')) {
 		deactivate_plugins(basename(__FILE__)); // Deactivate ourself
 		wp_die("Sorry, TweetPress requires PHP 5 or higher. Ask your host how to enable PHP 5 as the default on your servers.");
@@ -75,28 +72,8 @@ function tp_activate(){
 		'autotweet_secret' => '',
 	
 	));
-	
-	global $oauth_activate;
-	$oauth_activate = true;
 }
-register_activation_hook(__FILE__, 'tp_activate');
-
-// register twitter in wp-oauth
-function add_twitter_to_oauth_sites($sites){
-	$sites[] = 'twitter';
-	return $sites;
-}
-add_filter('oauth_sites', 'add_twitter_to_oauth_sites');
-
-// start wp-oauth
-function tp_wp_oauth_start() {
-	if(isset($_GET['oauth_token'])) {
-		tp_oauth_confirm();
-	} else {
-		tp_oauth_start();
-	}
-}
-add_action('oauth_start_twitter', 'tp_wp_oauth_start');
+register_activation_hook(__FILE__, 'tp_activation_check');
 
 // action links
 add_filter('plugin_action_links_'.plugin_basename(__FILE__), 'tp_links', 10, 1);
@@ -168,7 +145,7 @@ function tp_oauth_start() {
 	exit;
 }
 
-function tp_oauth_confirm() {
+function oauth_confirm() {
 	$options = tp_options();
 	if (empty($options['consumer_key']) || empty($options['consumer_secret'])) return false;
 	include_once "twitterOAuth.php";
@@ -557,7 +534,7 @@ function tp_login_profile_page($profile) {
 		<tr>
 			<th><label><?php _e('Twitter Connect', 'tp'); ?></label></th>
 <?php
-	$twuid = get_user_meta($profile->ID, 'twuid', true);
+	$twuid = get_user_meta($profile->ID, 'twuid');
 	if (empty($twuid)) { 
 		?>
 			<td><p><?php echo tp_get_connect_button('login_connect'); ?></p></td>
@@ -594,7 +571,7 @@ add_action('wp_ajax_disconnect_twuid', 'tp_login_disconnect_twuid');
 function tp_login_disconnect_twuid() {
 	$user = wp_get_current_user();
 	
-	$twuid = get_user_meta($user->ID, 'twuid', true);
+	$twuid = get_user_meta($user->ID, 'twuid');
 	if ($twuid == $_POST['twuid']) {
 		delete_usermeta($user->ID, 'twuid');
 	}
