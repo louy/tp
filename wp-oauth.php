@@ -17,7 +17,7 @@ add_action('init', 'oauth_init');
 function oauth_init() {
 	global $wp, $oauth_activate;
 	
-	add_rewrite_rule('oauth/(.+?)/?', 'index.php?oauth=$matches[1]',1);
+	add_rewrite_rule('oauth/(.+)/?$', 'index.php?oauth=$matches[1]',1);
 	add_rewrite_rule('oauth/?', 'index.php?oauth=null',1);
 	
 	$wp->add_query_var('oauth');
@@ -28,9 +28,8 @@ add_action('template_redirect', 'oauth_template_redirect');
 function oauth_template_redirect() {
 	if( get_query_var('oauth') ) {
 		$oauth_sites = apply_filters('oauth_sites', array());
-		$site = get_query_var('oauth');
-		if( substr($site, -1, 1) == '/' )
-			$site = substr($site, 0, -1);
+		$site = explode('/',get_query_var('oauth'));
+		$site = $site[0];
 		if( !in_array($site, $oauth_sites)) {
 			do_action('wp_oauth_unknown_site');
 			die( __('OAuth site not recognized!') );
