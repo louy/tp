@@ -20,7 +20,7 @@ load_plugin_textdomain( 'tp', false, dirname( plugin_basename( __FILE__ ) ) . '/
 
 define('TP_VERSION', '1.0');
 
-require_once 'wp-oauth.php';
+require_once dirname(__FILE__).'/wp-oauth.php';
 
 /**
  * TweetPress Core:
@@ -34,14 +34,10 @@ function tp_init() {
 	
 	isset($_SESSION['tw-connected']) or 
 		$_SESSION['tw-connected'] = false;
-	/*
-	// fast check for authentication requests on plugin load.
-	if(isset($_GET['oauth']) && $_GET['oauth'] == 'twitter') {
-		tp_oauth_start();
-	}
+	
 	if(isset($_GET['oauth_token'])) {
 		tp_oauth_confirm();
-	}*/
+	}
 }
 
 function tp_options($k=false) {
@@ -54,6 +50,8 @@ function tp_options($k=false) {
 
 // require PHP 5
 function tp_activate(){
+	oauth_activate();
+	
 	if (version_compare(PHP_VERSION, '5.0.0', '<')) {
 		deactivate_plugins(basename(__FILE__)); // Deactivate ourself
 		wp_die("Sorry, TweetPress requires PHP 5 or higher. Ask your host how to enable PHP 5 as the default on your servers.");
@@ -75,9 +73,6 @@ function tp_activate(){
 		'autotweet_secret' => '',
 	
 	));
-	
-	global $oauth_activate;
-	$oauth_activate = true;
 }
 register_activation_hook(__FILE__, 'tp_activate');
 
@@ -87,16 +82,6 @@ function add_twitter_to_oauth_sites($sites){
 	return $sites;
 }
 add_filter('oauth_sites', 'add_twitter_to_oauth_sites');
-
-// start wp-oauth
-function tp_wp_oauth_start() {
-	if(isset($_GET['oauth_token'])) {
-		tp_oauth_confirm();
-	} else {
-		tp_oauth_start();
-	}
-}
-add_action('oauth_start_twitter', 'tp_wp_oauth_start');
 
 // action links
 add_filter('plugin_action_links_'.plugin_basename(__FILE__), 'tp_links', 10, 1);
@@ -146,6 +131,7 @@ function tp_options_page() {
 <?php
 }
 
+// start wp-oauth
 function tp_oauth_start() {
 	$options = tp_options();
 	if (empty($options['consumer_key']) || empty($options['consumer_secret'])) return false;
@@ -167,6 +153,7 @@ function tp_oauth_start() {
 	wp_redirect($url);
 	exit;
 }
+add_action('oauth_start_twitter', 'tp_oauth_start');
 
 function tp_oauth_confirm() {
 	$options = tp_options();
