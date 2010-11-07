@@ -317,7 +317,7 @@ add_filter('option_tp_options', 'tp_override_options');
 function tp_options_validate($input) {
 	if (!defined('TWITTER_CONSUMER_KEY') && !defined('TWITTER_CONSUMER_SECRET')) {
             if( isset($input['consumer_key']) && isset($input['consumer_secret']) &&
-                    (is_multisite() ? is_network_admin() : 1) ) {
+                    (is_multisite() ? is_super_admin() : 1) ) {
 
 		$input['consumer_key'] = trim($input['consumer_key']);
 		if(! preg_match('/^[A-Za-z0-9]+$/i', $input['consumer_key'])) {
