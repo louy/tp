@@ -40,6 +40,10 @@ function tp_init() {
 	}
 }
 
+function tp_app_options_defined() {
+    return defined('TWITTER_CONSUMER_KEY') && defined('TWITTER_CONSUMER_SECRET');
+}
+
 function tp_options($k=false) {
 	$options = get_option('tp_options');
         $options = array_merge($options, tp_app_options());
@@ -52,7 +56,7 @@ function tp_options($k=false) {
 function tp_app_options() {
     $options = get_site_option('twitter_app_details');
     
-    if( defined('TWITTER_CONSUMER_KEY') && defined('TWITTER_CONSUMER_SECRET') ) {
+    if( tp_app_options_defined() ) {
         $options['consumer_key']    = TWITTER_CONSUMER_KEY   ;
         $options['consumer_secret'] = TWITTER_CONSUMER_SECRET;
     }
@@ -83,6 +87,8 @@ add_filter('oauth_sites', 'add_twitter_to_oauth_sites');
 add_filter('plugin_action_links_'.plugin_basename(__FILE__), 'tp_links', 10, 1);
 function tp_links($links) {
 	$links[] = '<a href="'.admin_url('options-general.php?page=tp').'">'.__('Settings', 'tp').'</a>';
+        if( tp_app_options_defined() )
+            $links[] = '<a href="'.admin_url('options-general.php?page=tp-app').'">'.__('App Settings', 'tp').'</a>';
 	return $links;
 }
 
@@ -90,6 +96,9 @@ function tp_links($links) {
 add_action('admin_menu', 'tp_admin_add_page');
 function tp_admin_add_page() {
 	add_options_page(__('TweetPress', 'tp'), __('TweetPress', 'tp'), 'manage_options', 'tp', 'tp_options_page');
+        if( tp_app_options_defined() &&
+                ( is_multisite() ? is_super_admin() : true ) )
+            add_options_page(__('TweetPress App', 'tp'), __('TweetPress App', 'tp'), 'manage_options', 'tp-app', 'tp_app_options_page');
 }
 
 // add the admin settings and such
@@ -123,12 +132,13 @@ function tp_admin_init(){
     }
     wp_enqueue_script('jquery');
     register_setting( 'tp_options', 'tp_options', 'tp_options_validate' );
-    add_settings_section('tp_main', __('TweetPress Main Settings', 'tp'), 'tp_section_text', 'tp');
     
-    if ( (!defined('TWITTER_CONSUMER_KEY') && !defined('TWITTER_CONSUMER_SECRET')) OR
-            is_multisite() && !is_network_admin() ) {
-        add_settings_field('tp_consumer_key', __('Twitter Consumer Key', 'tp'), 'tp_setting_consumer_key', 'tp', 'tp_main');
-        add_settings_field('tp_consumer_secret', __('Twitter Consumer Secret', 'tp'), 'tp_setting_consumer_secret', 'tp', 'tp_main');
+    if ( !tp_app_options_defined() &&
+            (is_multisite() ? is_super_admin() : true) ) {
+        register_setting( 'tp_app_options', 'tp_app_options', 'tp_app_options_validate' );
+        add_settings_section('tp-app', __('TweetPress App Settings', 'tp'), 'tp_section_text', 'tp-app');
+        add_settings_field('tp_consumer_key', __('Twitter Consumer Key', 'tp'), 'tp_setting_consumer_key', 'tp-app', 'tp-app');
+        add_settings_field('tp_consumer_secret', __('Twitter Consumer Secret', 'tp'), 'tp_setting_consumer_secret', 'tp-app', 'tp-app');
     }
 }
 
@@ -149,7 +159,26 @@ function tp_options_page() {
 	</form>
 
 	</div>
-	
+
+<?php
+}
+function tp_app_options_page() {
+?>
+	<div class="wrap">
+	<h2><?php _e('TweetPress', 'tp'); ?></h2>
+	<p><?php _e('Twitter App Options.', 'tp'); ?></p>
+	<form method="post" action="options.php">
+	<?php settings_fields('tp_app_options'); ?>
+	<table><tr><td>
+	<?php do_settings_sections('tp-app'); ?>
+	</td></tr></table>
+	<p class="submit">
+	<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes', 'tp') ?>" />
+	</p>
+	</form>
+
+	</div>
+
 <?php
 }
 
@@ -304,17 +333,13 @@ function tp_setting_consumer_secret() {
 	echo "<input type='text' id='tpconsumersecret' name='tp_options[consumer_secret]' value='{$options['consumer_secret']}' size='40' /> " . __('(required)', 'tp');
 }
 
-// this will override the main options if they are pre-defined
-function tp_override_options($options) {
-	if (defined('TWITTER_CONSUMER_KEY')) unset($options['consumer_key']);
-	if (defined('TWITTER_CONSUMER_SECRET')) unset($options['consumer_secret']);
-	return $options;
-}
-add_filter('option_tp_options', 'tp_override_options');
-
-
 // validate our options
 function tp_options_validate($input) {
+        unset($input['consumer_key'], $input['consumer_secret']);
+	$input = apply_filters('tp_validate_options',$input);
+	return $input;
+}
+function tp_app_options_validate($input) {
 	if (!defined('TWITTER_CONSUMER_KEY') && !defined('TWITTER_CONSUMER_SECRET')) {
             if( isset($input['consumer_key']) && isset($input['consumer_secret']) &&
                     (is_multisite() ? is_super_admin() : 1) ) {
@@ -338,9 +363,8 @@ function tp_options_validate($input) {
 
             }
 	}
-        unset($input['consumer_key'], $input['consumer_secret']);
 
-	$input = apply_filters('tp_validate_options',$input);
+	$input = apply_filters('tp_validate_app_options',$input);
 	return $input;
 }
 
