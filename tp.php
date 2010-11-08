@@ -96,7 +96,7 @@ function tp_links($links) {
 add_action('admin_menu', 'tp_admin_add_page');
 function tp_admin_add_page() {
 	add_options_page(__('TweetPress', 'tp'), __('TweetPress', 'tp'), 'manage_options', 'tp', 'tp_options_page');
-        if( tp_app_options_defined() &&
+        if( !tp_app_options_defined() &&
                 ( is_multisite() ? is_super_admin() : true ) )
             add_options_page(__('TweetPress App', 'tp'), __('TweetPress App', 'tp'), 'manage_options', 'tp-app', 'tp_app_options_page');
 }
@@ -136,9 +136,9 @@ function tp_admin_init(){
     if ( !tp_app_options_defined() &&
             (is_multisite() ? is_super_admin() : true) ) {
         register_setting( 'tp_app_options', 'tp_app_options', 'tp_app_options_validate' );
-        add_settings_section('tp-app', __('TweetPress App Settings', 'tp'), 'tp_section_text', 'tp-app');
-        add_settings_field('tp_consumer_key', __('Twitter Consumer Key', 'tp'), 'tp_setting_consumer_key', 'tp-app', 'tp-app');
-        add_settings_field('tp_consumer_secret', __('Twitter Consumer Secret', 'tp'), 'tp_setting_consumer_secret', 'tp-app', 'tp-app');
+        add_settings_section('tp_app', __('TweetPress App Settings', 'tp'), 'tp_section_text', 'tp_app');
+        add_settings_field('tp_consumer_key', __('Twitter Consumer Key', 'tp'), 'tp_setting_consumer_key', 'tp_app', 'tp_app');
+        add_settings_field('tp_consumer_secret', __('Twitter Consumer Secret', 'tp'), 'tp_setting_consumer_secret', 'tp_app', 'tp_app');
     }
 }
 
@@ -170,7 +170,7 @@ function tp_app_options_page() {
 	<form method="post" action="options.php">
 	<?php settings_fields('tp_app_options'); ?>
 	<table><tr><td>
-	<?php do_settings_sections('tp-app'); ?>
+	<?php do_settings_sections('tp_app'); ?>
 	</td></tr></table>
 	<p class="submit">
 	<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes', 'tp') ?>" />
