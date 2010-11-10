@@ -44,6 +44,11 @@ function tp_app_options_defined() {
     return defined('TWITTER_CONSUMER_KEY') && defined('TWITTER_CONSUMER_SECRET');
 }
 
+function user_can_edit_tp_app_options() {
+    return !tp_app_options_defined() &&
+            ( is_multisite() ? is_super_admin() : is_admin() );
+}
+
 function tp_options($k=false) {
 	$options = get_option('tp_options');
         $options = array_merge($options, tp_app_options());
@@ -54,8 +59,8 @@ function tp_options($k=false) {
 }
 
 function tp_app_options() {
-    $options = get_site_option('twitter_app_details');
-    
+    $options = get_site_option('tp_app_options');
+
     if( tp_app_options_defined() ) {
         $options['consumer_key']    = TWITTER_CONSUMER_KEY   ;
         $options['consumer_secret'] = TWITTER_CONSUMER_SECRET;
@@ -70,7 +75,7 @@ function tp_activate(){
 	
 	if (version_compare(PHP_VERSION, '5.0.0', '<')) {
 		deactivate_plugins(basename(__FILE__)); // Deactivate ourself
-		wp_die("Sorry, TweetPress requires PHP 5 or higher. Ask your host how to enable PHP 5 as the default on your servers.");
+		wp_die(__("Sorry, TweetPress requires PHP 5 or higher. Ask your host how to enable PHP 5 as the default on your servers."));
 	}
         
 }
@@ -96,15 +101,13 @@ function tp_links($links) {
 add_action('admin_menu', 'tp_admin_add_page');
 function tp_admin_add_page() {
 	add_options_page(__('TweetPress', 'tp'), __('TweetPress', 'tp'), 'manage_options', 'tp', 'tp_options_page');
-        if( !tp_app_options_defined() &&
-                ( is_multisite() ? is_super_admin() : true ) )
+        if( user_can_edit_tp_app_options() )
             add_options_page(__('TweetPress App', 'tp'), __('TweetPress App', 'tp'), 'manage_options', 'tp-app', 'tp_app_options_page');
 }
 
 // add the admin settings and such
 add_action('admin_init', 'tp_admin_init',9);
 function tp_admin_init(){
-
     add_option('tp_options', array(
         'allow_comments' => false,
         'comm_text' => '',
@@ -120,7 +123,7 @@ function tp_admin_init(){
         'autotweet_secret' => '',
     ));
 
-    add_site_option('twitter_app_details', array(
+    add_site_option('tp_app_options', array(
         'consumer_key' => '',
         'consumer_secret' => '',
     ));
@@ -128,17 +131,16 @@ function tp_admin_init(){
     $options = tp_options();
     
     if (empty($options['consumer_key']) || empty($options['consumer_secret'])) {
-            add_action('admin_notices', create_function( '', "echo '<div class=\"error\"><p>".sprintf(__('TweetPress needs to be configured on its <a href="%s">settings</a> page.', 'tp'), admin_url('options-general.php?page=tp'))."</p></div>';" ) );
+            add_action('admin_notices', create_function( '', "echo '<div class=\"error\"><p>".sprintf(__('TweetPress needs to be configured on its <a href="%s">settings</a> page.', 'tp'), admin_url('options-general.php?page=tp-app'))."</p></div>';" ) );
     }
     wp_enqueue_script('jquery');
     register_setting( 'tp_options', 'tp_options', 'tp_options_validate' );
     
-    if ( !tp_app_options_defined() &&
-            (is_multisite() ? is_super_admin() : true) ) {
+    if ( user_can_edit_tp_app_options() ) {
         register_setting( 'tp_app_options', 'tp_app_options', 'tp_app_options_validate' );
-        add_settings_section('tp_app', __('TweetPress App Settings', 'tp'), 'tp_section_text', 'tp_app');
-        add_settings_field('tp_consumer_key', __('Twitter Consumer Key', 'tp'), 'tp_setting_consumer_key', 'tp_app', 'tp_app');
-        add_settings_field('tp_consumer_secret', __('Twitter Consumer Secret', 'tp'), 'tp_setting_consumer_secret', 'tp_app', 'tp_app');
+        add_settings_section('tp_app_options', __('TweetPress App Settings', 'tp'), 'tp_section_text', 'tp_app');
+        add_settings_field('tp_consumer_key', __('Twitter Consumer Key', 'tp'), 'tp_setting_consumer_key', 'tp_app', 'tp_app_options');
+        add_settings_field('tp_consumer_secret', __('Twitter Consumer Secret', 'tp'), 'tp_setting_consumer_secret', 'tp_app', 'tp_app_options');
     }
 }
 
@@ -182,98 +184,6 @@ function tp_app_options_page() {
 <?php
 }
 
-// start wp-oauth
-function tp_oauth_start() {
-	$options = tp_options();
-	if (empty($options['consumer_key']) || empty($options['consumer_secret'])) return false;
-	include_once "twitterOAuth.php";
-
-	$to = new TwitterOAuth($options['consumer_key'], $options['consumer_secret']);
-	$tok = $to->getRequestToken();
-
-	$token = $tok['oauth_token'];
-	$_SESSION['tp_req_token'] = $token;
-	$_SESSION['tp_req_secret'] = $tok['oauth_token_secret'];
-
-	$_SESSION['tp_callback'] = $_GET['loc'];
-	$_SESSION['tp_callback_action'] = $_GET['tpaction'];
-	
-	if ($_GET['type'] == 'authorize') $url=$to->getAuthorizeURL($token);
-	else $url=$to->getAuthenticateURL($token);
-
-	wp_redirect($url);
-	exit;
-}
-add_action('oauth_start_twitter', 'tp_oauth_start');
-
-function tp_oauth_confirm() {
-	$options = tp_options();
-	if (empty($options['consumer_key']) || empty($options['consumer_secret'])) return false;
-	include_once "twitterOAuth.php";
-
-	$to = new TwitterOAuth($options['consumer_key'], $options['consumer_secret'], $_SESSION['tp_req_token'], $_SESSION['tp_req_secret']);
-
-	$tok = $to->getAccessToken();
-
-	$_SESSION['tp_acc_token'] = $tok['oauth_token'];
-	$_SESSION['tp_acc_secret'] = $tok['oauth_token_secret'];
-
-	$to = new TwitterOAuth($options['consumer_key'], $options['consumer_secret'], $tok['oauth_token'], $tok['oauth_token_secret']);
-	
-	$_SESSION['tw-connected'] = true;
-	
-	// this lets us do things actions on the return from twitter and such
-	if ($_SESSION['tp_callback_action']) {
-		do_action('tp_'.$_SESSION['tp_callback_action']);
-		$_SESSION['tp_callback_action'] = ''; // clear the action
-	}
-	
-	wp_redirect(remove_query_arg('reauth', $_SESSION['tp_callback']));
-	exit;
-}
-
-// get the user credentials from twitter
-function tp_get_credentials($force_check = false) {
-	
-	if(!$force_check && !$_SESSION['tw-connected']) return false;
-	
-	// cache the results in the session so we don't do this over and over
-	if (!$force_check && $_SESSION['tp_credentials']) return $_SESSION['tp_credentials']; 
-	
-	$_SESSION['tp_credentials'] = tp_do_request('http://twitter.com/account/verify_credentials');
-	
-	return $_SESSION['tp_credentials'];
-}
-
-// json is assumed for this, so don't add .xml or .json to the request URL
-function tp_do_request($url, $args = array(), $type = NULL) {
-	
-	if (isset($args['acc_token'])) {
-		$acc_token = $args['acc_token'];
-		unset($args['acc_token']);
-	} else {
-		$acc_token = isset($_SESSION['tp_acc_token']) ? $_SESSION['tp_acc_token'] : false;
-	}
-	
-	if (isset($args['acc_secret'])) {
-		$acc_secret = $args['acc_secret'];
-		unset($args['acc_secret']);
-	} else {
-		$acc_secret = isset($_SESSION['tp_acc_secret']) ? $_SESSION['tp_acc_secret'] : false;
-	}
-	
-	$options = tp_options();
-	if (empty($options['consumer_key']) || empty($options['consumer_secret']) ||
-		empty($acc_token) || empty($acc_secret) ) return false;
-
-	include_once "twitterOAuth.php";
-
-	$to = new TwitterOAuth($options['consumer_key'], $options['consumer_secret'], $acc_token, $acc_secret);
-	$json = $to->OAuthRequest($url.'.json', $args, $type);
-
-	return json_decode($json);
-}
-
 function tp_section_text() {
 	$options = tp_options();
 	if (empty($options['consumer_key']) || empty($options['consumer_secret'])) {
@@ -301,36 +211,16 @@ function tp_section_text() {
 	}
 }
 
-function tp_get_connect_button($action='', $type='authenticate', $image ='Sign-in-with-Twitter-darker') {
-	$image = apply_filters('tp_connect_button_image', $image, $action, $type);
-	$imgsrc = apply_filters('tp_connect_button_image_src', plugins_url('/images/'.$image.'.png', __FILE__), $image, $action, $type);
-	return apply_filters('tp_get_connect_button', 
-		'<a href="' . oauth_link('twitter', array(
-				'tpaction' => $action,
-				'loc' => tp_get_current_url(), 
-				'type' => $type) ) . '" title="'.__('Sign in with Twitter', 'tp').'">'.
-			'<img src="'.$imgsrc.'" alt="'.__('Sign in with Twitter', 'tp').'" style="border:none;" />'.
-		'</a>', $action, $type, $image);
-}
-
-function tp_get_current_url() {
-	// build the URL in the address bar
-	$requested_url  = ( !empty($_SERVER['HTTPS'] ) && strtolower($_SERVER['HTTPS']) == 'on' ) ? 'https://' : 'http://';
-	$requested_url .= $_SERVER['HTTP_HOST'];
-	$requested_url .= $_SERVER['REQUEST_URI'];
-	return $requested_url;
-}
-
 function tp_setting_consumer_key() {
 	if (defined('TWITTER_CONSUMER_KEY')) return;
-	$options = tp_options();
-	echo "<input type='text' id='tpconsumerkey' name='tp_options[consumer_key]' value='{$options['consumer_key']}' size='40' /> " . __('(required)', 'tp');	
+	$options = tp_app_options();
+	echo "<input type='text' id='tpconsumerkey' name='tp_app_options[consumer_key]' value='{$options['consumer_key']}' size='40' /> " . __('(required)', 'tp');
 }
 
 function tp_setting_consumer_secret() {
 	if (defined('TWITTER_CONSUMER_SECRET')) return;
-	$options = tp_options();
-	echo "<input type='text' id='tpconsumersecret' name='tp_options[consumer_secret]' value='{$options['consumer_secret']}' size='40' /> " . __('(required)', 'tp');
+	$options = tp_app_options();
+	echo "<input type='text' id='tpconsumersecret' name='tp_app_options[consumer_secret]' value='{$options['consumer_secret']}' size='40' /> " . __('(required)', 'tp');
 }
 
 // validate our options
@@ -340,31 +230,33 @@ function tp_options_validate($input) {
 	return $input;
 }
 function tp_app_options_validate($input) {
-	if (!defined('TWITTER_CONSUMER_KEY') && !defined('TWITTER_CONSUMER_SECRET')) {
-            if( isset($input['consumer_key']) && isset($input['consumer_secret']) &&
-                    (is_multisite() ? is_super_admin() : 1) ) {
-
-		$input['consumer_key'] = trim($input['consumer_key']);
-		if(! preg_match('/^[A-Za-z0-9]+$/i', $input['consumer_key'])) {
-		  $input['consumer_key'] = '';
-		}
-
-		$input['consumer_secret'] = trim($input['consumer_secret']);
-		if(! preg_match('/^[A-Za-z0-9]+$/i', $input['consumer_secret'])) {
-		  $input['consumer_secret'] = '';
-		}
-
-                $app_options = array(
-                    'consumer_key'    => $input['consumer_key'],
-                    'consumer_secret' => $input['consumer_secret'],
-                );
-
-                update_site_option('twitter_app_details', $app_options);
-
-            }
-	}
-
 	$input = apply_filters('tp_validate_app_options',$input);
+/*
+        if( isset($input['consumer_key']) && isset($input['consumer_secret']) &&
+                user_can_edit_tp_app_options() ) {
+
+            $input['consumer_key'] = trim($input['consumer_key']);
+            if(! preg_match('/^[A-Za-z0-9]+$/i', $input['consumer_key'])) {
+              $input['consumer_key'] = '';
+            }
+
+            $input['consumer_secret'] = trim($input['consumer_secret']);
+            if(! preg_match('/^[A-Za-z0-9]+$/i', $input['consumer_secret'])) {
+              $input['consumer_secret'] = '';
+            }
+
+            $app_options = array(
+                'consumer_key'    => $input['consumer_key'],
+                'consumer_secret' => $input['consumer_secret'],
+            );
+
+            update_site_option('tp_app_options', $app_options);
+
+        }
+  */
+
+        update_site_option('tp_app_options', $input);
+
 	return $input;
 }
 
@@ -378,6 +270,118 @@ function anywhereloader() {
 	if (!empty($options['consumer_key'])) {		
 		wp_enqueue_script( 'twitter-anywhere', "http://platform.twitter.com/anywhere.js?id={$options['consumer_key']}&v=1", array(), '1', false);
 	}
+}
+
+// start wp-oauth
+function tp_oauth_start() {
+	$options = tp_options();
+	if (empty($options['consumer_key']) || empty($options['consumer_secret'])) return false;
+	include_once "twitterOAuth.php";
+
+	$to = new TwitterOAuth($options['consumer_key'], $options['consumer_secret']);
+	$tok = $to->getRequestToken();
+
+	$token = $tok['oauth_token'];
+	$_SESSION['tp_req_token'] = $token;
+	$_SESSION['tp_req_secret'] = $tok['oauth_token_secret'];
+
+	$_SESSION['tp_callback'] = $_GET['loc'];
+	$_SESSION['tp_callback_action'] = $_GET['tpaction'];
+
+	if ($_GET['type'] == 'authorize') $url=$to->getAuthorizeURL($token);
+	else $url=$to->getAuthenticateURL($token);
+
+	wp_redirect($url);
+	exit;
+}
+add_action('oauth_start_twitter', 'tp_oauth_start');
+
+function tp_oauth_confirm() {
+	$options = tp_options();
+	if (empty($options['consumer_key']) || empty($options['consumer_secret'])) return false;
+	include_once "twitterOAuth.php";
+
+	$to = new TwitterOAuth($options['consumer_key'], $options['consumer_secret'], $_SESSION['tp_req_token'], $_SESSION['tp_req_secret']);
+
+	$tok = $to->getAccessToken();
+
+	$_SESSION['tp_acc_token'] = $tok['oauth_token'];
+	$_SESSION['tp_acc_secret'] = $tok['oauth_token_secret'];
+
+	$to = new TwitterOAuth($options['consumer_key'], $options['consumer_secret'], $tok['oauth_token'], $tok['oauth_token_secret']);
+
+	$_SESSION['tw-connected'] = true;
+
+	// this lets us do things actions on the return from twitter and such
+	if ($_SESSION['tp_callback_action']) {
+		do_action('tp_'.$_SESSION['tp_callback_action']);
+		$_SESSION['tp_callback_action'] = ''; // clear the action
+	}
+
+	wp_redirect(remove_query_arg('reauth', $_SESSION['tp_callback']));
+	exit;
+}
+
+// get the user credentials from twitter
+function tp_get_credentials($force_check = false) {
+
+	if(!$force_check && !$_SESSION['tw-connected']) return false;
+
+	// cache the results in the session so we don't do this over and over
+	if (!$force_check && $_SESSION['tp_credentials']) return $_SESSION['tp_credentials'];
+
+	$_SESSION['tp_credentials'] = tp_do_request('http://twitter.com/account/verify_credentials');
+
+	return $_SESSION['tp_credentials'];
+}
+
+// json is assumed for this, so don't add .xml or .json to the request URL
+function tp_do_request($url, $args = array(), $type = NULL) {
+
+	if (isset($args['acc_token'])) {
+		$acc_token = $args['acc_token'];
+		unset($args['acc_token']);
+	} else {
+		$acc_token = isset($_SESSION['tp_acc_token']) ? $_SESSION['tp_acc_token'] : false;
+	}
+
+	if (isset($args['acc_secret'])) {
+		$acc_secret = $args['acc_secret'];
+		unset($args['acc_secret']);
+	} else {
+		$acc_secret = isset($_SESSION['tp_acc_secret']) ? $_SESSION['tp_acc_secret'] : false;
+	}
+
+	$options = tp_options();
+	if (empty($options['consumer_key']) || empty($options['consumer_secret']) ||
+		empty($acc_token) || empty($acc_secret) ) return false;
+
+	include_once "twitterOAuth.php";
+
+	$to = new TwitterOAuth($options['consumer_key'], $options['consumer_secret'], $acc_token, $acc_secret);
+	$json = $to->OAuthRequest($url.'.json', $args, $type);
+
+	return json_decode($json);
+}
+
+function tp_get_connect_button($action='', $type='authenticate', $image ='Sign-in-with-Twitter-darker') {
+	$image = apply_filters('tp_connect_button_image', $image, $action, $type);
+	$imgsrc = apply_filters('tp_connect_button_image_src', plugins_url('/images/'.$image.'.png', __FILE__), $image, $action, $type);
+	return apply_filters('tp_get_connect_button',
+		'<a href="' . oauth_link('twitter', array(
+				'tpaction' => $action,
+				'loc' => tp_get_current_url(),
+				'type' => $type) ) . '" title="'.__('Sign in with Twitter', 'tp').'">'.
+			'<img src="'.$imgsrc.'" alt="'.__('Sign in with Twitter', 'tp').'" style="border:none;" />'.
+		'</a>', $action, $type, $image);
+}
+
+function tp_get_current_url() {
+	// build the URL in the address bar
+	$requested_url  = ( !empty($_SERVER['HTTPS'] ) && strtolower($_SERVER['HTTPS']) == 'on' ) ? 'https://' : 'http://';
+	$requested_url .= $_SERVER['HTTP_HOST'];
+	$requested_url .= $_SERVER['REQUEST_URI'];
+	return $requested_url;
 }
 
 /**
