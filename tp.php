@@ -46,7 +46,7 @@ function tp_app_options_defined() {
 
 function user_can_edit_tp_app_options() {
     return !tp_app_options_defined() &&
-            ( is_multisite() ? is_super_admin() : is_admin() );
+            ( is_multisite() ? is_super_admin() : user_can('manage_options') );
 }
 
 function tp_options($k=false) {
@@ -123,6 +123,8 @@ function tp_admin_init(){
         'autotweet_secret' => '',
     ));
 
+    add_option('tp_app_options', array());
+    
     add_site_option('tp_app_options', array(
         'consumer_key' => '',
         'consumer_secret' => '',
