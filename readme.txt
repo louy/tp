@@ -1,16 +1,18 @@
 === Plugin Name ===
 Contributors: louyx
 Author URL: http://louyblog.wordpress.com/
-Tags: twitter, oauth, login, tweet, tweetbutton, comment, publish, connect
+Tags: twitter, oauth, login, tweet, tweetbutton, comment, publish, connect, admin, plugin, comments, wpmu, button
 Requires at least: 3.0
 Tested up to: 3.0.1
-Stable tag: 1.0
+Stable tag: 1.2
 
 All the tools you need to integrate your wordpress and twitter.
 
 == Description ==
 
-TweetPress, gives you all the tools you need to integrate your wordpress and twitter... based on the "Simple Twitter Connect" plugin, but highly customizable.
+TweetPress, gives you all the tools you need to integrate your wordpress and twitter, including "Login with Twitter" and "Comment via Twitter"...
+highly customizable and easy to use.
+
 
 = Key Features =
 
