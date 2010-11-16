@@ -46,7 +46,7 @@ function tp_app_options_defined() {
 
 function user_can_edit_tp_app_options() {
     return !tp_app_options_defined() &&
-            ( is_multisite() ? is_super_admin() : user_can('manage_options') );
+            ( is_multisite() ? is_super_admin() : current_user_can('manage_options') );
 }
 
 function tp_options($k=false) {
@@ -101,7 +101,7 @@ function tp_links($links) {
 add_action('admin_menu', 'tp_admin_add_page');
 function tp_admin_add_page() {
 	add_options_page(__('TweetPress', 'tp'), __('TweetPress', 'tp'), 'manage_options', 'tp', 'tp_options_page');
-        if( user_can_edit_tp_app_options() )
+        //if( user_can_edit_tp_app_options() )
             add_options_page(__('TweetPress App', 'tp'), __('TweetPress App', 'tp'), 'manage_options', 'tp-app', 'tp_app_options_page');
 }
 
@@ -138,12 +138,14 @@ function tp_admin_init(){
     wp_enqueue_script('jquery');
     register_setting( 'tp_options', 'tp_options', 'tp_options_validate' );
     
-    if ( user_can_edit_tp_app_options() ) {
+    if ( 1||user_can_edit_tp_app_options() ) {
         register_setting( 'tp_app_options', 'tp_app_options', 'tp_app_options_validate' );
         add_settings_section('tp_app_options', __('TweetPress App Settings', 'tp'), 'tp_section_text', 'tp_app');
         add_settings_field('tp_consumer_key', __('Twitter Consumer Key', 'tp'), 'tp_setting_consumer_key', 'tp_app', 'tp_app_options');
         add_settings_field('tp_consumer_secret', __('Twitter Consumer Secret', 'tp'), 'tp_setting_consumer_secret', 'tp_app', 'tp_app_options');
     }
+
+    echo '<!--'.(int)user_can_edit_tp_app_options().'-->';
 }
 
 // display the admin options page
@@ -232,34 +234,15 @@ function tp_options_validate($input) {
 	return $input;
 }
 function tp_app_options_validate($input) {
-	$input = apply_filters('tp_validate_app_options',$input);
-/*
-        if( isset($input['consumer_key']) && isset($input['consumer_secret']) &&
-                user_can_edit_tp_app_options() ) {
-
-            $input['consumer_key'] = trim($input['consumer_key']);
-            if(! preg_match('/^[A-Za-z0-9]+$/i', $input['consumer_key'])) {
-              $input['consumer_key'] = '';
-            }
-
-            $input['consumer_secret'] = trim($input['consumer_secret']);
-            if(! preg_match('/^[A-Za-z0-9]+$/i', $input['consumer_secret'])) {
-              $input['consumer_secret'] = '';
-            }
-
-            $app_options = array(
-                'consumer_key'    => $input['consumer_key'],
-                'consumer_secret' => $input['consumer_secret'],
-            );
-
-            update_site_option('tp_app_options', $app_options);
-
-        }
-  */
 
         update_site_option('tp_app_options', $input);
+	$input = apply_filters('tp_validate_app_options',$input);
+         $output = array(
+             'consumer_key' => $input['consumer_key'],
+             'consumer_secret' => $input['consumer_secret']
+             );
 
-	return $input;
+	return $output;
 }
 
 
