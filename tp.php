@@ -100,7 +100,7 @@ function tp_activate(){
 
 	if (version_compare(PHP_VERSION, '5.0.0', '<')) {
 		deactivate_plugins(basename(__FILE__)); // Deactivate ourself
-		wp_die(__("Sorry, TweetPress requires PHP 5 or higher. Ask your host how to enable PHP 5 as the default on your servers."));
+		wp_die(__("Sorry, TweetPress requires PHP 5 or higher. Ask your host how to enable PHP 5 as the default on your servers.", 'tp'));
 	}
 
 }
@@ -127,7 +127,7 @@ add_action('admin_menu', 'tp_admin_add_page');
 function tp_admin_add_page() {
 	add_options_page(__('TweetPress', 'tp'), __('TweetPress', 'tp'), 'manage_options', 'tp', 'tp_options_page');
         if( user_can_edit_tp_app_options() ) {
-            add_options_page('TweetPress App', 'TweetPress App', 'manage_options', 'tpapp', 'tp_app_options_page');
+            add_options_page(__('TweetPress App', 'tp'), __('TweetPress App', 'tp'), 'manage_options', 'tpapp', 'tp_app_options_page');
         }
 }
 
@@ -138,17 +138,18 @@ function tp_admin_init(){
     $options = tp_options();
 
     if (empty($options['consumer_key']) || empty($options['consumer_secret'])) {
-            add_action('admin_notices', create_function( '', "echo '<div class=\"error\"><p>".sprintf(__('TweetPress needs to be configured on its <a href="%s">settings</a> page.', 'tp'), admin_url('options-general.php?page=tpapp'))."</p></div>';" ) );
+            add_action('admin_notices', create_function( '', "echo '<div class=\"error\"><p>".sprintf(__('TweetPress needs to be configured on its <a href="%s">app settings</a> page.', 'tp'), admin_url('options-general.php?page=tpapp'))."</p></div>';" ) );
     }
     wp_enqueue_script('jquery');
     register_setting( 'tp_options', 'tp_options', 'tp_options_validate' );
 
     if ( user_can_edit_tp_app_options() ) {
         register_setting( 'tp_app_options', 'tp_app_options', 'tp_app_options_validate' );
-	add_settings_section('tp_app_consumer', __('App Consumer Settings', 'tp'), 'tp_app_consumer_callback', 'tpapp');
-	add_settings_field('tp-consumer-key', 'Twitter Consumer Key',
+	add_settings_section('tp_app_consumer', __('App Consumer Settings', 'tp'),
+                'tp_app_consumer_callback', 'tpapp');
+	add_settings_field('tp-consumer-key', __('Twitter Consumer Key', 'tp'),
                 'tp_setting_consumer_key', 'tpapp', 'tp_app_consumer' );
-	add_settings_field('tp-consumer-secret', 'Twitter Consumer Secret',
+	add_settings_field('tp-consumer-secret', __('Twitter Consumer Secret', 'tp'),
                 'tp_setting_consumer_secret', 'tpapp', 'tp_app_consumer' );
     }
 }
@@ -158,14 +159,13 @@ function tp_options_page() {
 ?>
 	<div class="wrap">
 	<h2><?php _e('TweetPress', 'tp'); ?></h2>
-	<p><?php _e('Options related to the TweetPress plugin.', 'tp'); ?></p>
 	<form method="post" action="options.php">
 	<?php settings_fields('tp_options'); ?>
 	<table><tr><td>
 	<?php do_settings_sections('tp'); ?>
 	</td></tr></table>
 	<p class="submit">
-	<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes', 'tp') ?>" />
+	<input type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes', 'tp') ?>" />
 	</p>
 	</form>
 
@@ -183,7 +183,7 @@ function tp_app_options_page() {
 	<?php do_settings_sections('tpapp'); ?>
 	</td></tr></table>
 	<p class="submit">
-	<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes', 'tp') ?>" />
+	<input type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes', 'tp') ?>" />
 	</p>
 	</form>
 
@@ -1094,8 +1094,8 @@ add_shortcode('twitterfollow','tp_follow_shortcode');
 
 class TP_Follow_Widget extends WP_Widget {
 	function TP_Follow_Widget() {
-		$widget_ops = array('classname' => 'widget_tp-follow', 'description' => __('Twitter Follow Button'));
-		$this->WP_Widget('tp-follow', __('Twitter Follow Button'), $widget_ops);
+		$widget_ops = array('classname' => 'widget_tp-follow', 'description' => __('Twitter Follow Button', 'tp'));
+		$this->WP_Widget('tp-follow', __('Twitter Follow Button', 'tp'), $widget_ops);
 	}
 
 	function widget($args, $instance) {
@@ -1130,10 +1130,10 @@ class TP_Follow_Widget extends WP_Widget {
 		$title = strip_tags($instance['title']);
 		$user = strip_tags($instance['user']);
 		?>
-<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:'); ?>
+<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'tp'); ?>
 <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" />
 </label></p>
-<p><label for="<?php echo $this->get_field_id('user'); ?>"><?php _e('Username:'); ?>
+<p><label for="<?php echo $this->get_field_id('user'); ?>"><?php _e('Username:', 'tp'); ?>
 <input class="widefat" id="<?php echo $this->get_field_id('user'); ?>" name="<?php echo $this->get_field_name('user'); ?>" type="text" value="<?php echo $user; ?>" />
 </label></p>
 		<?php
