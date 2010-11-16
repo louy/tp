@@ -50,16 +50,41 @@ function user_can_edit_tp_app_options() {
 }
 
 function tp_options($k=false) {
-	$options = get_option('tp_options');
-        $options = array_merge($options, tp_app_options());
-	if( $k ) {
-		$options = $options[$k];
-	}
-	return $options;
+    $options = get_option('tp_options');
+
+    if( !is_array($options) ) {
+        add_option('tp_options', $options = array(
+            'allow_comments' => false,
+            'comm_text' => '',
+            'tweetbutton_source' => 'l0uy',
+            'tweetbutton_position' => 'manual',
+            'tweetbutton_style' => 'vertical',
+            'tweetbutton_css' => '',
+            'tweetbutton_singleonly' => true,
+            'autotweet_flag' => 0,
+            'publish_text' => __('%title% %url%[ifauthor] by %author%[/ifauthor]', 'tp'),
+            'autotweet_name' => '',
+            'autotweet_token' => '',
+            'autotweet_secret' => '',
+        ));
+    }
+
+    $options = array_merge($options, tp_app_options());
+    if( $k ) {
+            $options = $options[$k];
+    }
+    return $options;
 }
 
 function tp_app_options() {
     $options = get_site_option('tp_app_options');
+
+    if( !is_array($options) ) {
+        add_site_option('tp_app_options', $options = array(
+            'consumer_key' => '',
+            'consumer_secret' => '',
+        ));
+    }
 
     if( tp_app_options_defined() ) {
         $options['consumer_key']    = TWITTER_CONSUMER_KEY   ;
@@ -108,28 +133,7 @@ function tp_admin_add_page() {
 // add the admin settings and such
 add_action('admin_init', 'tp_admin_init',9);
 function tp_admin_init(){
-    add_option('tp_options', array(
-        'allow_comments' => false,
-        'comm_text' => '',
-        'tweetbutton_source' => 'l0uy',
-        'tweetbutton_position' => 'manual',
-        'tweetbutton_style' => 'vertical',
-        'tweetbutton_css' => '',
-        'tweetbutton_singleonly' => true,
-        'autotweet_flag' => 0,
-        'publish_text' => __('%title% %url%[ifauthor] by %author%[/ifauthor]', 'tp'),
-        'autotweet_name' => '',
-        'autotweet_token' => '',
-        'autotweet_secret' => '',
-    ));
-
-    add_option('tp_app_options', array());
     
-    add_site_option('tp_app_options', array(
-        'consumer_key' => '',
-        'consumer_secret' => '',
-    ));
-
     $options = tp_options();
     
     if (empty($options['consumer_key']) || empty($options['consumer_secret'])) {
@@ -144,8 +148,6 @@ function tp_admin_init(){
         add_settings_field('tp_consumer_key', __('Twitter Consumer Key', 'tp'), 'tp_setting_consumer_key', 'tp_app', 'tp_app_options');
         add_settings_field('tp_consumer_secret', __('Twitter Consumer Secret', 'tp'), 'tp_setting_consumer_secret', 'tp_app', 'tp_app_options');
     }
-
-    echo '<!--'.(int)user_can_edit_tp_app_options().'-->';
 }
 
 // display the admin options page
@@ -240,7 +242,7 @@ function tp_app_options_validate($input) {
          $output = array(
              'consumer_key' => $input['consumer_key'],
              'consumer_secret' => $input['consumer_secret']
-             );
+         );
 
 	return $output;
 }
