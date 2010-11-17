@@ -279,8 +279,7 @@ function tp_oauth_start() {
 	$_SESSION['tp_callback'] = $_GET['loc'];
 	$_SESSION['tp_callback_action'] = $_GET['tpaction'];
 
-	if ($_GET['type'] == 'authorize') $url=$to->getAuthorizeURL($token);
-	else $url=$to->getAuthenticateURL($token);
+	$url=$to->getAuthorizeURL($token);
 
 	wp_redirect($url);
 	exit;
