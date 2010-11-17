@@ -4,7 +4,7 @@ Author URL: http://louyblog.wordpress.com/
 Tags: twitter, oauth, login, tweet, tweetbutton, comment, publish, connect, admin, plugin, comments, wpmu, button
 Requires at least: 3.0
 Tested up to: 3.0.1
-Stable tag: 1.0
+Stable tag: 1.2.5
 
 All the tools you need to integrate your wordpress and twitter.
 
@@ -26,7 +26,7 @@ highly customizable and easy to use.
 == Changelog ==
 
 = 1.2.5 =
-* A few small changes
+* A few small fixes
 
 = 1.2 =
 * TweetPress now works awesomely on multi-site wordpress installations.
