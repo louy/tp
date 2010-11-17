@@ -320,7 +320,7 @@ function tp_get_credentials($force_check = false) {
 	// cache the results in the session so we don't do this over and over
 	if (!$force_check && $_SESSION['tp_credentials']) return $_SESSION['tp_credentials'];
 
-	$_SESSION['tp_credentials'] = tp_do_request('http://twitter.com/account/verify_credentials');
+	$_SESSION['tp_credentials'] = tp_do_request('account/verify_credentials');
 
 	return $_SESSION['tp_credentials'];
 }
@@ -526,7 +526,7 @@ function tp_comm_send_to_twitter() {
 
 		$args['status'] = str_replace('%',$link, $options['comment_text']);
 
-		$resp = tp_do_request('http://api.twitter.com/1/statuses/update',$args);
+		$resp = tp_do_request('statuses/update',$args);
 	}
 }
 
@@ -1023,7 +1023,7 @@ function tp_publish_automatic($id, $post) {
 	$args['acc_token'] = $options['autotweet_token'];
 	$args['acc_secret'] = $options['autotweet_secret'];
 
-	$resp = tp_do_request('http://api.twitter.com/1/statuses/update',$args);
+	$resp = tp_do_request('statuses/update',$args);
 }
 
 function tp_get_default_tweet($id) {
