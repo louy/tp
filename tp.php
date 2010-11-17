@@ -293,7 +293,7 @@ function tp_oauth_confirm() {
 
 	$to = new TwitterOAuth($options['consumer_key'], $options['consumer_secret'], $_SESSION['tp_req_token'], $_SESSION['tp_req_secret']);
 
-	$tok = $to->getAccessToken();
+	$tok = $to->getAccessToken($_REQUEST['oauth_verifier']);
 
 	$_SESSION['tp_acc_token'] = $tok['oauth_token'];
 	$_SESSION['tp_acc_secret'] = $tok['oauth_token_secret'];
