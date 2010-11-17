@@ -3,7 +3,7 @@
 Plugin Name: TP - TweetPress
 Description: All the tools you need to integrate your wordpress and twitter.
 Author: Louy
-Version: 1.2
+Version: 1.2.5
 Author URI: http://l0uy.com
 Text Domain: tp
 Domain Path: /po
@@ -18,7 +18,7 @@ add your keys and copy the following 2 lines to your wp-config.php
 // Load translations
 load_plugin_textdomain( 'tp', false, dirname( plugin_basename( __FILE__ ) ) . '/po/' );
 
-define('TP_VERSION', '1.2');
+define('TP_VERSION', '1.2.5');
 
 require_once dirname(__FILE__).'/wp-oauth.php';
 
@@ -168,7 +168,6 @@ function tp_options_page() {
 	<input type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes', 'tp') ?>" />
 	</p>
 	</form>
-
 	</div>
 
 <?php
@@ -186,7 +185,6 @@ function tp_app_options_page() {
 	<input type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes', 'tp') ?>" />
 	</p>
 	</form>
-
 	</div>
 
 <?php
@@ -208,7 +206,7 @@ function tp_app_consumer_callback() {
 <li><?php _e('Go to this link to create your application: <a target="_blank" href="http://dev.twitter.com/apps/new">Twitter: Register an Application</a>', 'tp'); ?></li>
 <li><?php _e('Important Settings:', 'tp'); ?><ol>
 <li><?php _e('Application Type must be set to "Browser".', 'tp'); ?></li>
-<li><?php printf(__('Callback URL must be set to "%s".', 'tp'), get_bloginfo('url')); ?></li>
+<!-- li><?php printf(__('Callback URL must be set to "%s".', 'tp'), get_bloginfo('url')); ?></li -->
 <li><?php _e('Default Access type must be set to "Read and Write".', 'tp'); ?></li>
 </ol>
 </li>
@@ -246,7 +244,9 @@ function tp_app_options_validate($input) {
         'consumer_key'    => $input['consumer_key'],
         'consumer_secret' => $input['consumer_secret']
     );
-    update_site_option('tp_app_options', $output);
+    
+    if( is_multisite() )
+        update_site_option('tp_app_options', $output);
 
     return $output;
 }
@@ -270,7 +270,7 @@ function tp_oauth_start() {
 	include_once "twitterOAuth.php";
 
 	$to = new TwitterOAuth($options['consumer_key'], $options['consumer_secret']);
-	$tok = $to->getRequestToken();
+	$tok = $to->getRequestToken(get_bloginfo('url'));
 
 	$token = $tok['oauth_token'];
 	$_SESSION['tp_req_token'] = $token;
@@ -350,9 +350,19 @@ function tp_do_request($url, $args = array(), $type = NULL) {
 	include_once "twitterOAuth.php";
 
 	$to = new TwitterOAuth($options['consumer_key'], $options['consumer_secret'], $acc_token, $acc_secret);
-	$json = $to->OAuthRequest($url.'.json', $args, $type);
 
-	return json_decode($json);
+        switch(strtolower($type)) {
+            case 'post':
+                return $to->post($url, $args);
+            case 'delete':
+                return $to->delete($url, $args);
+            case 'get':
+            default:
+                return $to->get($url, $args);
+        }
+	$json = $to->OAuthRequest($url, $type, $args);
+
+	return $json;
 }
 
 function tp_get_connect_button($action='', $type='authenticate', $image ='Sign-in-with-Twitter-darker') {

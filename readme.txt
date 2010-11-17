@@ -25,6 +25,9 @@ highly customizable and easy to use.
 
 == Changelog ==
 
+= 1.2.5 =
+* A few small changes
+
 = 1.2 =
 * TweetPress now works awesomely on multi-site wordpress installations.
 

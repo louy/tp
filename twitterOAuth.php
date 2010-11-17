@@ -1,16 +1,9 @@
 <?php
+
 /*
  * Abraham Williams (abraham@abrah.am) http://abrah.am
  *
- * Basic lib to work with Twitter's OAuth beta. This is untested and should not
- * be used in production code. Twitter's beta could change at anytime.
- *
- * Code based on:
- * Fire Eagle code - http://github.com/myelin/fireeagle-php-lib
- * twitterlibphp - http://github.com/poseurtech/twitterlibphp
- * 
- * Modified for standard WordPress HTTP API support by Otto - otto@ottodestruct.com
- *
+ * The first PHP Library to support OAuth for Twitter's REST API.
  */
 
 /* Load OAuth lib. You can find it at http://oauth.net */
@@ -20,22 +13,39 @@ require_once('OAuth.php');
  * Twitter OAuth class
  */
 class TwitterOAuth {
-  /* Contains the last HTTP status code returned */
-  private $http_status;
+  /* Contains the last HTTP status code returned. */
+  public $http_code;
+  /* Contains the last API call. */
+  public $url;
+  /* Set up the API root URL. */
+  public $host = "https://api.twitter.com/1/";
+  /* Set timeout default. */
+  public $timeout = 30;
+  /* Set connect timeout. */
+  public $connecttimeout = 30;
+  /* Verify SSL Cert. */
+  public $ssl_verifypeer = FALSE;
+  /* Respons format. */
+  public $format = 'json';
+  /* Decode returned json data. */
+  public $decode_json = TRUE;
+  /* Contains the last HTTP headers returned. */
+  public $http_info;
+  /* Set the useragnet. */
+  public $useragent = 'TwitterOAuth v0.2.0-beta2';
+  /* Immediately retry the API call if the response was not successful. */
+  //public $retry = TRUE;
 
-  /* Contains the last API call */
-  private $last_api_call;
 
-  /* Set up the API root URL */
-  public static $TO_API_ROOT = "http://twitter.com";
+
 
   /**
    * Set API URLS
    */
-  function requestTokenURL() { return self::$TO_API_ROOT.'/oauth/request_token'; }
-  function authorizeURL() { return self::$TO_API_ROOT.'/oauth/authorize'; }
-  function authenticateURL() { return self::$TO_API_ROOT.'/oauth/authenticate'; }
-  function accessTokenURL() { return self::$TO_API_ROOT.'/oauth/access_token'; }
+  function accessTokenURL()  { return 'https://api.twitter.com/oauth/access_token'; }
+  function authenticateURL() { return 'https://twitter.com/oauth/authenticate'; }
+  function authorizeURL()    { return 'https://twitter.com/oauth/authorize'; }
+  function requestTokenURL() { return 'https://api.twitter.com/oauth/request_token'; }
 
   /**
    * Debug helpers
@@ -62,26 +72,15 @@ class TwitterOAuth {
    *
    * @returns a key/value array containing oauth_token and oauth_token_secret
    */
-  function getRequestToken() {
-    $r = $this->oAuthRequest($this->requestTokenURL());
-    $token = $this->oAuthParseResponse($r);
+  function getRequestToken($oauth_callback = NULL) {
+    $parameters = array();
+    if (!empty($oauth_callback)) {
+      $parameters['oauth_callback'] = $oauth_callback;
+    }
+    $request = $this->oAuthRequest($this->requestTokenURL(), 'GET', $parameters);
+    $token = OAuthUtil::parse_parameters($request);
     $this->token = new OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
     return $token;
-  }
-
-  /**
-   * Parse a URL-encoded OAuth response
-   *
-   * @return a key/value array
-   */
-  function oAuthParseResponse($responseString) {
-    $r = array();
-    foreach (explode('&', $responseString) as $param) {
-      $pair = explode('=', $param, 2);
-      if (count($pair) != 2) continue;
-      $r[urldecode($pair[0])] = urldecode($pair[1]);
-    }
-    return $r;
   }
 
   /**
@@ -89,63 +88,129 @@ class TwitterOAuth {
    *
    * @returns a string
    */
-  function getAuthorizeURL($token) {
-    if (is_array($token)) $token = $token['oauth_token'];
-    return $this->authorizeURL() . '?oauth_token=' . $token;
+  function getAuthorizeURL($token, $sign_in_with_twitter = TRUE) {
+    if (is_array($token)) {
+      $token = $token['oauth_token'];
+    }
+    if (empty($sign_in_with_twitter)) {
+      return $this->authorizeURL() . "?oauth_token={$token}";
+    } else {
+       return $this->authenticateURL() . "?oauth_token={$token}";
+  }
   }
 
-
   /**
-   * Get the authenticate URL
-   *
-   * @returns a string
-   */
-  function getAuthenticateURL($token) {
-    if (is_array($token)) $token = $token['oauth_token'];
-    return $this->authenticateURL() . '?oauth_token=' . $token;
-  }
-  
-  /**
-   * Exchange the request token and secret for an access token and
+   * Exchange request token and secret for an access token and
    * secret, to sign API calls.
    *
-   * @returns array("oauth_token" => the access token,
-   *                "oauth_token_secret" => the access secret)
+   * @returns array("oauth_token" => "the-access-token",
+   *                "oauth_token_secret" => "the-access-secret",
+   *                "user_id" => "9436992",
+   *                "screen_name" => "abraham")
    */
-  function getAccessToken($token = NULL) {
-    $r = $this->oAuthRequest($this->accessTokenURL());
-    $token = $this->oAuthParseResponse($r);
+  function getAccessToken($oauth_verifier = FALSE) {
+    $parameters = array();
+    if (!empty($oauth_verifier)) {
+      $parameters['oauth_verifier'] = $oauth_verifier;
+  }
+    $request = $this->oAuthRequest($this->accessTokenURL(), 'GET', $parameters);
+    $token = OAuthUtil::parse_parameters($request);
     $this->token = new OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
     return $token;
   }
 
   /**
-   * Format and sign an OAuth / API request
+   * One time exchange of username and password for access token and secret.
+   *
+   * @returns array("oauth_token" => "the-access-token",
+   *                "oauth_token_secret" => "the-access-secret",
+   *                "user_id" => "9436992",
+   *                "screen_name" => "abraham",
+   *                "x_auth_expires" => "0")
    */
-  function oAuthRequest($url, $args = array(), $method = NULL) {
-    if (empty($method)) $method = empty($args) ? "GET" : "POST";
-    $req = OAuthRequest::from_consumer_and_token($this->consumer, $this->token, $method, $url, $args);
-    $req->sign_request($this->sha1_method, $this->consumer, $this->token);
-    
-    $response = false;
-    $url=null;
-    
-    switch ($method) {
-    case 'GET': 
-    	$url = $req->to_url();
-       	$response = wp_remote_get( $url );
-       	break;
-	case 'POST':
-		$url = $req->get_normalized_http_url();
-		$args = wp_parse_args($req->to_postdata());
-       	$response = wp_remote_post( $url, array('body'=>$args));
-       	break;
+  function getXAuthToken($username, $password) {
+    $parameters = array();
+    $parameters['x_auth_username'] = $username;
+    $parameters['x_auth_password'] = $password;
+    $parameters['x_auth_mode'] = 'client_auth';
+    $request = $this->oAuthRequest($this->accessTokenURL(), 'POST', $parameters);
+    $token = OAuthUtil::parse_parameters($request);
+    $this->token = new OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
+    return $token;
+  }
+  
+  /**
+   * GET wrapper for oAuthRequest.
+   */
+    function get($url, $parameters = array()) {
+        $response = $this->oAuthRequest($url, 'GET', $parameters);
+        if ($this->format === 'json' && $this->decode_json) {
+            return json_decode($response);
+        }
+        return $response;
     }
 
-	if ( is_wp_error( $response ) )	return false;
+  /**
+   * POST wrapper for oAuthRequest.
+   */
+    function post($url, $parameters = array()) {
+        $response = $this->oAuthRequest($url, 'POST', $parameters);
+        if ($this->format === 'json' && $this->decode_json) {
+            return json_decode($response);
+        }
+        return $response;
+    }
+
+  /**
+   * DELETE wrapper for oAuthReqeust.
+   */
+    function delete($url, $parameters = array()) {
+        $response = $this->oAuthRequest($url, 'DELETE', $parameters);
+        if ($this->format === 'json' && $this->decode_json) {
+            return json_decode($response);
+        }
+        return $response;
+    }
+
+  /**
+   * Format and sign an OAuth / API request
+   */
+  function oAuthRequest($url, $method, $parameters) {
+    if (strrpos($url, 'https://') !== 0 && strrpos($url, 'http://') !== 0) {
+      $url = "{$this->host}{$url}.{$this->format}";
+    }
+    $request = OAuthRequest::from_consumer_and_token($this->consumer, $this->token, $method, $url, $parameters);
+    $request->sign_request($this->sha1_method, $this->consumer, $this->token);
+    switch ($method) {
+    case 'GET':
+      return $this->http($request->to_url(), 'GET');
+    default:
+      return $this->http($request->get_normalized_http_url(), $method, $request->to_postdata());
+    }
+  }
+
+  /**
+   * Make an HTTP request
+   *
+   * @return API results
+   */
+  function http($url, $method, $postfields = NULL) {
+    $this->http_info = array();
+
+    $args = array(
+        'timeout' => $this->timeout,
+        'user-agent' => $this->useragent,
+        'body' => wp_parse_args($postfields),
+        'method' => $method
+    );
+
+    $response = wp_remote_request( $url, $args);
 
     $this->http_status = $response['response']['code'];
     $this->last_api_call = $url;
+
+    if ( is_wp_error( $response ) )
+        return false;
 
 	return $response['body'];
   } 
