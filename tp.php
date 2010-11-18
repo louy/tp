@@ -366,7 +366,7 @@ function tp_do_request($url, $args = array(), $type = NULL) {
 
 function tp_get_connect_button($action='', $type='authenticate', $image ='Sign-in-with-Twitter-darker') {
 	$image = apply_filters('tp_connect_button_image', $image, $action, $type);
-	$imgsrc = apply_filters('tp_connect_button_image_src', plugins_url('/images/'.$image.'.png', __FILE__), $image, $action, $type);
+	$imgsrc = apply_filters('tp_connect_button_image_src', plugins_url() . '/tp/images/'.$image.'.png', $image, $action, $type);
 	return apply_filters('tp_get_connect_button',
 		'<a href="' . oauth_link('twitter', array(
 				'tpaction' => $action,
@@ -701,9 +701,9 @@ function tp_login_check($user) {
 	return $user;
 }
 
-add_action('wp_logout','tp_login_logout');
-function tp_login_logout() {
-	session_unset();
+add_action('wp_logout','tp_logout');
+function tp_logout() {
+    session_destroy();
 }
 
 /**
