@@ -3,7 +3,7 @@
 Plugin Name: TP - TweetPress
 Description: All the tools you need to integrate your wordpress and twitter.
 Author: Louy
-Version: 1.2.5
+Version: 1.2.6
 Author URI: http://l0uy.com
 Text Domain: tp
 Domain Path: /po
@@ -18,7 +18,7 @@ add your keys and copy the following 2 lines to your wp-config.php
 // Load translations
 load_plugin_textdomain( 'tp', false, dirname( plugin_basename( __FILE__ ) ) . '/po/' );
 
-define('TP_VERSION', '1.2.5');
+define('TP_VERSION', '1.2.6');
 
 require_once dirname(__FILE__).'/wp-oauth.php';
 
@@ -186,6 +186,7 @@ function tp_app_options_page() {
 	<input type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes', 'tp') ?>" />
 	</p>
 	</form>
+        <p><?php _e('If you like this plugin, Follow me <a href="http://twitter.com/l0uy">@l0uy</a> for more updates.', 'tp'); ?></p>
 	</div>
 
 <?php
@@ -253,7 +254,7 @@ function tp_update_app_options($new, $old) {
 
 // load the @anywhere script
 add_action('wp_enqueue_scripts','anywhereloader');
-add_action('admin_enqueue_scripts','anywhereloader');
+//add_action('admin_enqueue_scripts','anywhereloader');
 function anywhereloader() {
 	$options = tp_options();
 
