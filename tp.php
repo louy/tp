@@ -144,7 +144,8 @@ function tp_admin_init(){
     register_setting( 'tp_options', 'tp_options', 'tp_options_validate' );
 
     if ( user_can_edit_tp_app_options() ) {
-        register_setting( 'tp_app_options', 'tp_app_options', 'tp_app_options_validate' );
+        register_setting( 'tp_app_options', 'tp_app_options' );
+        add_filter('pre_update_option_tp_app_options','tp_update_app_options', 2 );
 	add_settings_section('tp_app_consumer', __('App Consumer Settings', 'tp'),
                 'tp_app_consumer_callback', 'tpapp');
 	add_settings_field('tp-consumer-key', __('Twitter Consumer Key', 'tp'),
@@ -235,18 +236,16 @@ function tp_options_validate($input) {
 	$input = apply_filters('tp_validate_options',$input);
 	return $input;
 }
-function tp_app_options_validate($input) {
-    $input = apply_filters('tp_validate_app_options',$input);
-
-    $input = apply_filters('tp_validate_app_options', $input);
-
+function tp_update_app_options($new, $old) {
     $output = array(
-        'consumer_key'    => $input['consumer_key'],
-        'consumer_secret' => $input['consumer_secret']
+        'consumer_key'    => $new['consumer_key'],
+        'consumer_secret' => $new['consumer_secret']
     );
-    
-    if( is_multisite() )
-        update_site_option('tp_app_options', $output);
+
+    if( is_multisite() ) {
+        if( $output != $old )
+            update_site_option('tp_app_options', $output);
+    }
 
     return $output;
 }
