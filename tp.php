@@ -1,4 +1,4 @@
-<?php
+allow<?php
 /*
 Plugin Name: TP - TweetPress
 Description: All the tools you need to integrate your wordpress and twitter.
@@ -54,7 +54,7 @@ function tp_options($k=false) {
 
     if( !is_array($options) ) {
         add_option('tp_options', $options = array(
-            'allow_comments' => false,
+            'allow_comment' => false,
             'comm_text' => '',
             'tweetbutton_source' => 'l0uy',
             'tweetbutton_position' => 'manual',
@@ -389,7 +389,7 @@ function tp_get_current_url() {
  */
 add_action('admin_init','tp_comm_error_check');
 function tp_comm_error_check() {
-	if ( get_option( 'comment_registration' ) && tp_options('allow_comments') ) {
+	if ( get_option( 'comment_registration' ) && tp_options('allow_comment') ) {
 		add_action('admin_notices', create_function( '', "echo '<div class=\"error\"><p>".__('TweetPress Comment function doesn\'t work with sites that require registration to comment.', 'tp')."</p></div>';" ) );
 	}
 }
@@ -397,7 +397,7 @@ function tp_comm_error_check() {
 add_action('admin_init', 'tp_comm_admin_init');
 function tp_comm_admin_init() {
 	add_settings_section('tp_comm', __('Comment Settings', 'tp'), 'tp_comm_section_callback', 'tp');
-	add_settings_field('tp_allow_comments', __('Allow Twitter users to comment?', 'tp'), 'tp_setting_allow_comments', 'tp', 'tp_comm');
+	add_settings_field('tp_allow_comment', __('Allow Twitter users to comment?', 'tp'), 'tp_setting_allow_comment', 'tp', 'tp_comm');
 	add_settings_field('tp_comm_text', __('Comment Tweet Text', 'tp'), 'tp_comm_text', 'tp', 'tp_comm');
 }
 
@@ -408,7 +408,7 @@ function tp_comm_section_callback() {
 	}
 }
 
-function tp_setting_allow_comments() {
+function tp_setting_allow_comment() {
 	$options = tp_options();
 	echo "<input type='checkbox' id='tpallowcomment' name='tp_options[allow_comment]' value='yes' ".checked($options['allow_comment'],true,false)." />";
 }
