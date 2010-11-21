@@ -1,4 +1,4 @@
-allow<?php
+<?php
 /*
 Plugin Name: TP - TweetPress
 Description: All the tools you need to integrate your wordpress and twitter.
