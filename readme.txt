@@ -4,7 +4,7 @@ Author URL: http://louyblog.wordpress.com/
 Tags: twitter, oauth, login, tweet, tweetbutton, comment, publish, connect, admin, plugin, comments, wpmu, button
 Requires at least: 3.0
 Tested up to: 3.0.1
-Stable tag: 1.2.8
+Stable tag: 1.2.9
 
 All the tools you need to integrate your wordpress and twitter.
 
@@ -24,6 +24,9 @@ highly customizable and easy to use.
 * Add a follow button to your blog
 
 == Changelog ==
+
+= 1.2.9 =
+* A small fix in the options page
 
 = 1.2.8 =
 * Fixing a typo
