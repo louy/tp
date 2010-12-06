@@ -205,12 +205,12 @@ class TwitterOAuth {
     );
 
     $response = wp_remote_request( $url, $args);
-
-    $this->http_status = $response['response']['code'];
     $this->last_api_call = $url;
 
     if ( is_wp_error( $response ) )
         return false;
+    
+    $this->http_status = $response['response']['code'];
 
 	return $response['body'];
   } 
