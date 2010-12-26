@@ -181,7 +181,7 @@ function tp_options_page() {
 }
 function tp_app_options_page() {
     if( isset( $_POST['option_page'] ) && $_POST['option_page'] == 'tp_app_options' 
-                    && check_admin_referer('tp_app_options_group-options"') ) {
+                    && check_admin_referer('tp_app_options_group-options') ) {
         // Save options...
         $options = $_POST['tp_app_options'];
         update_option('tp_app_options', $options);
