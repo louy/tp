@@ -181,7 +181,7 @@ function tp_options_page() {
 }
 function tp_app_options_page() {
     if( isset( $_POST['option_page'] ) && $_POST['option_page'] == 'tp_app_options' 
-                    && check_admin_referer('tp_app_options_group-options') ) {
+                    && wp_verify_nonce($_POST['_wpnonce'], 'tp_app_options') ) {
         // Save options...
         $options = $_POST['tp_app_options'];
         update_option('tp_app_options', $options);
@@ -193,7 +193,8 @@ function tp_app_options_page() {
     <div class="wrap">
         <h2><?php _e('TweetPress App Options', 'tp'); ?></h2>
         <form method="post">
-            <?php settings_fields('tp_app_options'); ?>
+            <input type='hidden' name='option_page' value='tp_app_options' />
+            <?php wp_nonce_field('tp_app_options'); ?>
             <table><tr><td>
                 <?php do_settings_sections('tpapp'); ?>
             </td></tr></table>
