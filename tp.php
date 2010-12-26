@@ -127,13 +127,13 @@ function tp_admin_add_page() {
 	global $wp_version;
 	add_options_page(__('TweetPress', 'tp'), __('TweetPress', 'tp'), 'manage_options', 'tp', 'tp_options_page');
     if( (!is_multisite() || version_compare($wp_version, '3.1-dev', '<')) && user_can_edit_tp_app_options() ) {
-        add_options_page(__('TweetPress App', 'tp'), __('TweetPress App', 'tp'), 'manage_options', 'tpapp', 'tp_app_options_page');
+        add_submenu_page((is_multisite()?'ms-admin':'options-general').'.php', __('TweetPress App', 'tp'), __('TweetPress App', 'tp'), 'manage_options', 'tpapp', 'tp_app_options_page');
     }
 }
 add_action('network_admin_menu', 'tp_network_admin_add_page');
 function tp_network_admin_add_page() {
     if( is_multisite() && user_can_edit_tp_app_options() ) {
-        add_options_page(__('TweetPress App', 'tp'), __('TweetPress App', 'tp'), 'manage_options', 'tpapp', 'tp_app_options_page');
+        add_submenu_page('settings.php', __('TweetPress App', 'tp'), __('TweetPress App', 'tp'), 'manage_options', 'tpapp', 'tp_app_options_page');
     }
 }
 
@@ -584,6 +584,15 @@ function tp_comm_fill_in_fields($comment_post_ID) {
 		// use an @twitter email address. This shows it's a twitter name, and email to it won't work.
 		$_POST['email'] = $tw->screen_name.'@fake.twitter.com';
 	}
+}
+
+/* unset comment email cookie */
+add_filter('comment_post_redirect', 'tp_comment_cookie');
+function tp_comment_cookie($loc) {
+	if(substr($_POST['email'], -17, 17) == '@fake.twitter.com') {
+		setcookie('comment_author_email_' . COOKIEHASH, '', 0, COOKIEPATH, COOKIE_DOMAIN);
+	}
+	return $loc;
 }
 
 if( tp_options('allow_comment') ) {
