@@ -3,7 +3,7 @@ Contributors: louyx
 Author URL: http://louyblog.wordpress.com/
 Tags: twitter, oauth, login, tweet, tweetbutton, comment, publish, connect, admin, plugin, comments, wpmu, button
 Requires at least: 3.0
-Tested up to: 3.0.2
+Tested up to: 3.1
 Stable tag: 1.3
 
 All the tools you need to integrate your wordpress and twitter.
