@@ -180,14 +180,18 @@ function tp_options_page() {
 <?php
 }
 function tp_app_options_page() {
+    $updated = false;
     if( isset( $_POST['option_page'] ) && $_POST['option_page'] == 'tp_app_options' 
                     && wp_verify_nonce($_POST['_wpnonce'], 'tp_app_options') ) {
         // Save options...
         $options = $_POST['tp_app_options'];
         update_option('tp_app_options', $options);
+        /*
         $url = add_query_arg('updated', 'true', tp_get_current_url());
         wp_redirect($url);
         die();
+        */
+        echo '<div id="message" class="updated"><p>'.__('Options saved.').'</p></div>';
     }
 ?>
     <div class="wrap">
