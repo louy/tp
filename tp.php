@@ -180,10 +180,18 @@ function tp_options_page() {
 <?php
 }
 function tp_app_options_page() {
+    if( isset( $_POST['option_page'] ) && $_POST['option_page'] == 'tp_app_options' && check_admin_referer() ) {
+        // Save options...
+        $options = $_POST['tp_app_options'];
+        update_option('tp_app_options', $options);
+        $url = add_query_arg('updated', 'true', tp_get_current_url());
+        wp_redirect($url);
+        die();
+    }
 ?>
     <div class="wrap">
         <h2><?php _e('TweetPress App Options', 'tp'); ?></h2>
-        <form method="post" action="options.php">
+        <form method="post">
             <?php settings_fields('tp_app_options'); ?>
             <table><tr><td>
                 <?php do_settings_sections('tpapp'); ?>
