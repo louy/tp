@@ -776,7 +776,12 @@ function get_tweetbutton($args='') {
 
 	if (!empty($related)) $related = " data-related='{$related}'";
 
-	$out = "<a href='http://twitter.com/share' class='twitter-share-button' data-text='{$text}' data-url='{$url}' data-count='{$style}' data-via='{$source}' style='{$css}'{$related}>Tweet</a>";
+	$out = "<a href='http://twitter.com/share' class='twitter-share-button' data-text='{$text}' data-url='{$url}' data-count='{$style}' data-via='{$source}'{$related}>Tweet</a>";
+	
+	if( !empty( $css ) ) {
+		$out = "<span style='{$css}'>{$out}</span>";
+	}
+	
 	return $out;
 }
 
