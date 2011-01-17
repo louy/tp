@@ -3,8 +3,8 @@
 Plugin Name: TP - TweetPress
 Description: All the tools you need to integrate your wordpress and twitter.
 Author: Louy
-Version: 1.3
-Author URI: http://l0uy.com
+Version: 1.3.1
+Author URI: http://l0uy.com/
 Text Domain: tp
 Domain Path: /po
 */
@@ -18,13 +18,25 @@ add your keys and copy the following 2 lines to your wp-config.php
 // Load translations
 load_plugin_textdomain( 'tp', false, dirname( plugin_basename( __FILE__ ) ) . '/po/' );
 
-define('TP_VERSION', '1.3');
+define('TP_VERSION', '1.3.1');
 
 require_once dirname(__FILE__).'/wp-oauth.php';
 
 /**
  * TweetPress Core:
  */
+function tp_activate(){
+	oauth_activate();
+	
+	// require PHP 5
+	if (version_compare(PHP_VERSION, '5.0.0', '<')) {
+		deactivate_plugins(basename(__FILE__)); // Deactivate ourself
+		wp_die(__("Sorry, TweetPress requires PHP 5 or higher. Ask your host how to enable PHP 5 as the default on your servers.", 'tp'));
+	}
+
+}
+register_activation_hook(__FILE__, 'tp_activate');
+
 function tp_include_oauth() {
     if( !class_exists('TwitterOAuth') ) {
         require_once dirname(__FILE__) . '/twitterOAuth.php';
@@ -48,11 +60,6 @@ function tp_init() {
 
 function tp_app_options_defined() {
     return defined('TWITTER_CONSUMER_KEY') && defined('TWITTER_CONSUMER_SECRET');
-}
-
-function user_can_edit_tp_app_options() {
-    return !tp_app_options_defined() &&
-            ( is_multisite() ? is_super_admin() : current_user_can('manage_options') );
 }
 
 function tp_options($k=false) {
@@ -100,18 +107,6 @@ function tp_app_options() {
     return $options;
 }
 
-// require PHP 5
-function tp_activate(){
-	oauth_activate();
-
-	if (version_compare(PHP_VERSION, '5.0.0', '<')) {
-		deactivate_plugins(basename(__FILE__)); // Deactivate ourself
-		wp_die(__("Sorry, TweetPress requires PHP 5 or higher. Ask your host how to enable PHP 5 as the default on your servers.", 'tp'));
-	}
-
-}
-register_activation_hook(__FILE__, 'tp_activate');
-
 // action links
 add_filter('plugin_action_links_'.plugin_basename(__FILE__), 'tp_links', 10, 1);
 function tp_links($links) {
@@ -119,6 +114,11 @@ function tp_links($links) {
         if( tp_app_options_defined() )
             $links[] = '<a href="'.admin_url('options-general.php?page=tpapp').'">'.__('App Settings', 'tp').'</a>';
 	return $links;
+}
+
+function user_can_edit_tp_app_options() {
+    return !tp_app_options_defined() &&
+            ( is_multisite() ? is_super_admin() : current_user_can('manage_options') );
 }
 
 // add the admin options page
@@ -428,7 +428,7 @@ function tp_comm_section_callback() {
 
 function tp_setting_allow_comment() {
 	$options = tp_options();
-	echo "<input type='checkbox' id='tpallowcomment' name='tp_options[allow_comment]' value='yes' ".checked($options['allow_comment'],true,false)." />";
+	echo "<input type='checkbox' name='tp_options[allow_comment]' value='yes' ".checked($options['allow_comment'],true,false)." />";
 }
 
 function tp_comm_text() {
@@ -755,16 +755,19 @@ function get_tweetbutton($args='') {
 		global $post;
 		$id = $post->ID;
 	}
-	
-	extract($args);
 
 	$options = tp_options();
-	if ($options['tweetbutton_source']) $source = $options['tweetbutton_source'];
-	if ($options['tweetbutton_style']) $style = $options['tweetbutton_style'];
+	$style = $options['tweetbutton_style'];
+	$css = $options['tweetbutton_css'];
+	
+	extract($args);
+	
+	$source = $options['tweetbutton_source'];
 	
 	$related = $source;
-	if( get_the_author_meta('twuid') ) {
-		$related .= ':'.get_the_author_meta('twuid');
+	$author = get_the_author_meta('twuid');
+	if( $author && $source != $author ) {
+		$related .= ':' . $author;
 	}
 
 	$url = esc_attr(get_permalink($id));
@@ -773,7 +776,7 @@ function get_tweetbutton($args='') {
 
 	if (!empty($related)) $related = " data-related='{$related}'";
 
-	$out = "<a href='http://twitter.com/share' class='twitter-share-button' data-text='{$text}' data-url='{$url}' data-count='{$style}' data-via='{$source}'{$related}>Tweet</a>";
+	$out = "<a href='http://twitter.com/share' class='twitter-share-button' data-text='{$text}' data-url='{$url}' data-count='{$style}' data-via='{$source}' style='{$css}'{$related}>Tweet</a>";
 	return $out;
 }
 
@@ -830,7 +833,6 @@ function tweetbutton_admin_init() {
 	add_settings_field('tweetbutton_source', __('Tweet Source', 'tp'), 'tweetbutton_source', 'tp', 'tweetbutton');
 	add_settings_field('tweetbutton_position', __('Tweet Button Position', 'tp'), 'tweetbutton_position', 'tp', 'tweetbutton');
 	add_settings_field('tweetbutton_style', __('Tweet Button Style', 'tp'), 'tweetbutton_style', 'tp', 'tweetbutton');
-	//add_settings_field('tweetbutton_related', __('Tweet Button related', 'tp'), 'tweetbutton_related', 'tp', 'tweetbutton');
 	add_settings_field('tweetbutton_css', __('Tweet Button CSS', 'tp'), 'tweetbutton_css', 'tp', 'tweetbutton');
 	add_settings_field('tweetbutton_singleonly', __('Tweet Button Single Pages Only', 'tp'), 'tweetbutton_singleonly', 'tp', 'tweetbutton');
 }
