@@ -3,7 +3,7 @@
 Plugin Name: TP - TweetPress
 Description: All the tools you need to integrate your wordpress and twitter.
 Author: Louy
-Version: 1.3.1
+Version: 1.3.2
 Author URI: http://l0uy.com/
 Text Domain: tp
 Domain Path: /po
@@ -18,7 +18,7 @@ add your keys and copy the following 2 lines to your wp-config.php
 // Load translations
 load_plugin_textdomain( 'tp', false, dirname( plugin_basename( __FILE__ ) ) . '/po/' );
 
-define('TP_VERSION', '1.3.1');
+define('TP_VERSION', '1.3.2');
 
 require_once dirname(__FILE__).'/wp-oauth.php';
 
@@ -408,8 +408,12 @@ function tp_get_current_url() {
 add_action('admin_init','tp_comm_error_check');
 function tp_comm_error_check() {
 	if ( get_option( 'comment_registration' ) && tp_options('allow_comment') ) {
-		add_action('admin_notices', create_function( '', "echo '<div class=\"error\"><p>".__('TweetPress Comment function doesn\'t work with sites that require registration to comment.', 'tp')."</p></div>';" ) );
+		add_action("admin_notices", "tp_comment_admin_notice" );
 	}
+}
+
+function tp_comment_admin_notice() {
+	echo "<div class='error'><p>" . __("TweetPress Comment function doesn&#39;t work with sites that require registration to comment.", 'tp') . "</p></div>";
 }
 
 add_action('admin_init', 'tp_comm_admin_init');
