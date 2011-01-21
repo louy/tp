@@ -4,7 +4,7 @@ Author URL: http://louyblog.wordpress.com/
 Tags: twitter, oauth, login, tweet, tweetbutton, comment, publish, connect, admin, plugin, comments, wpmu, button
 Requires at least: 3.0
 Tested up to: 3.1
-Stable tag: 1.3
+Stable tag: 1.3.2
 
 All the tools you need to integrate your wordpress and twitter.
 
@@ -24,6 +24,12 @@ highly customizable and easy to use.
 * Add a follow button to your blog
 
 == Changelog ==
+
+= 1.3.2 =
+* Fixing notice when comment registeration is enabled, and TP comments are enabled too.
+
+= 1.3.1 =
+* Fixing a bug with tweetbutton css
 
 = 1.3 =
 * Moving Tweetpress App options page to the network admin in Multi-Site installations
@@ -67,3 +73,15 @@ highly customizable and easy to use.
 1. Download the plugin, unzip it and upload it to `/wp-content/plugins/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Go to Settings &raquo; TweetPress and enter your key and secret.
+
+== Frequently Asked Questions ==
+
+= When I click "Sign in with Twitter", I get a 404 error page. what can I do? =
+
+Well, TweetPress uses rewrite, so check your Settings > Permalink page and make sure rewrite is enabled.
+
+= I'm getting an error when I try to sign in with my twitter user: "Twitter user not recognized!" =
+
+Make sure you've linked your twitter and wordpress accounts, you can do that in your /wp-admin/profile.php page.
+
+
