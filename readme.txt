@@ -25,6 +25,9 @@ highly customizable and easy to use.
 
 == Changelog ==
 
+= 1.3.3 =
+* Fixing auto-publish
+
 = 1.3.2 =
 * Fixing notice when comment registeration is enabled, and TP comments are enabled too.
 
