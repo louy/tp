@@ -547,7 +547,7 @@ function tp_comm_send_to_twitter() {
 
 		$args['status'] = str_replace('%',$link, $options['comment_text']);
 
-		$resp = tp_do_request('statuses/update',$args);
+		$resp = tp_do_request('statuses/update',$args, 'post');
 	}
 }
 
