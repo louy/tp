@@ -25,9 +25,6 @@ highly customizable and easy to use.
 
 == Changelog ==
 
-= 1.3.4 =
-* Removing <br> after login button
-
 = 1.3.3 =
 * Fixing auto-publish
 
