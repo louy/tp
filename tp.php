@@ -3,7 +3,7 @@
 Plugin Name: TP - TweetPress
 Description: All the tools you need to integrate your wordpress and twitter.
 Author: Louy
-Version: 1.3.3
+Version: 1.3.4
 Author URI: http://l0uy.com/
 Text Domain: tp
 Domain Path: /po
@@ -18,7 +18,7 @@ add your keys and copy the following 2 lines to your wp-config.php
 // Load translations
 load_plugin_textdomain( 'tp', false, dirname( plugin_basename( __FILE__ ) ) . '/po/' );
 
-define('TP_VERSION', '1.3.3');
+define('TP_VERSION', '1.3.4');
 
 require_once dirname(__FILE__).'/wp-oauth.php';
 
@@ -511,7 +511,7 @@ function tp_comm_get_display() {
 
 // check for logout request
 function tp_comm_logout() {
-	if ($_GET['twitter-logout']) {
+	if (isset($_GET['twitter-logout'])) {
 		session_unset();
 		$page = tp_get_current_url();
 		if (strpos($page, "?") !== false) $page = reset(explode("?", $page));
