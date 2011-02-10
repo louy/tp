@@ -336,7 +336,7 @@ function tp_get_credentials($force_check = false) {
 	if(!$force_check && !$_SESSION['tw-connected']) return false;
 
 	// cache the results in the session so we don't do this over and over
-	if (!$force_check && $_SESSION['tp_credentials']) return $_SESSION['tp_credentials'];
+	if (!$force_check && isset($_SESSION['tp_credentials']) && $_SESSION['tp_credentials'] ) return $_SESSION['tp_credentials'];
 
 	$_SESSION['tp_credentials'] = tp_do_request('account/verify_credentials');
 
