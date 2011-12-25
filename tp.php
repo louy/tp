@@ -69,7 +69,9 @@ function tp_options($k=false) {
         add_option('tp_options', $options = array(
             'allow_comment' => false,
             'comm_text' => '',
-            'tweetbutton_source' => 'l0uy',
+            'tweetbutton_source' => '',
+            'tweetbutton_hashtag' => '',
+            'tweetbutton_large' => false,
             'tweetbutton_position' => 'manual',
             'tweetbutton_style' => 'vertical',
             'tweetbutton_css' => '',
@@ -747,44 +749,91 @@ $tweetbutton_is_displayed = false;
  * @param string $source Source that the RT will appear to be from.
  * @param int $post_id An optional post ID.
  */
-function get_tweetbutton($args='') {
+function get_tweetbutton($fargs='') {
 	global $tweetbutton_is_displayed;
 	$tweetbutton_is_displayed = true;
 	
 	$options = tp_options();
 	
 	$defaults = array(
-		'id' => 0,
+		'id' => false,
+		'url' => false,
+		'text' => false,
 		'count' => $options['tweetbutton_style'],
 		'css' => $options['tweetbutton_css'],
+		'hashtag' => $options['tweetbutton_hashtag'],
+		'via' => $options['tweetbutton_source'],
+		'large' => $options['tweetbutton_large'],
+		'related' => array(
+				$options['tweetbutton_source'] => ''
+			),
 	);
 	
-	$args = wp_parse_args($args,$defaults);
-	
-	$source = $options['tweetbutton_source'];
-	
-	if( !$args['id'] ) {
-		global $post;
-		$id = $post->ID;
-	}
+	$args = apply_filters('tp_tweetbutton_args', wp_parse_args($fargs,$defaults), $fargs, $defaults);
 	
 	extract($args);
 	
-	$related = $source;
-	$author = get_the_author_meta('twuid');
-	if( $author && $source != $author ) {
-		$related .= ':' . $author;
+	if( $count == 'vertical' )
+		$large = false;
+	
+	if( $id === false && $url === false && $text === false ) {
+		$id = get_the_ID();
 	}
 	
-	$related = apply_filters('tp_tweetbutton_related', $related);
+	if( !$url && $id ) {
+		$url = esc_attr(get_permalink($id));
+		$text = get_the_title($id);
+		
+		$author = get_the_author_meta('twuid', $id);
+		if( $author ) {
+			$defaults['related'][$author] = '';
+		}
+	}
 	
-	$url = esc_attr(get_permalink($id));
-	$the_post = get_post($id);
-	$text = esc_attr(strip_tags($the_post->post_title));;
+	$related_str = '';
 	
-	if (!empty($related)) $related = " data-related='{$related}'";
+	foreach($related as $user => $desc ) {
+		$related_str .= $user;
+		if( !empty($desc) ) 
+			$related_str .= ':' . esc_attr($desc);
+		$related_str .= ',';
+	}
 	
-	$out = "<a href='http://twitter.com/share' class='twitter-share-button' data-text='{$text}' data-url='{$url}' data-count='{$count}' data-via='{$source}'{$related}>Tweet</a>";
+	$related_str = apply_filters('tp_tweetbutton_related', substr($related_str,0,-1), $related);
+	$hashtag_str = $via_str = $text_str = '';
+	
+	if (!empty($related_str)) $related_str = " data-related='{$related}'";
+	
+	if (!empty($hashtag)) $hashtag_str = " data-hashtags='" . esc_attr($hashtag) . "'";
+	if (!empty($source)) $via_str = " data-via='" . esc_attr($source) . "'";
+	if (!empty($text)) $text_str = " data-text='" . esc_attr($text) . "'";
+	
+	if( $large )
+		$large_str = ' data-size="large"';
+	
+	switch( true ) {
+		case !empty( $url ):
+			$class = 'twitter-share-button';
+			$out = "<a href='http://twitter.com/share' class='{$class}' data-count='{$count}'" . 
+						" data-url='{$url}' data-text='{$text}'" .
+							$related_str . $hashtag_str .  $via_str . $large_str . 
+						">Tweet</a>";
+		break;
+		case !empty( $hashtag ):
+			$class = 'twitter-hashtag-button';
+			$out = "<a href='https://twitter.com/intent/tweet?button_hashtag={$hashtag}'" . 
+					" class='{$class}' data-count='{$count}'" . 
+							$text_str . $related_str . $hashtag_str . $large_str . 
+						">Tweet #hashtag</a>";
+		break;
+		case !empty( $via ):
+			$class = 'twitter-mention-button';
+			$out = "<a href='https://twitter.com/intent/tweet?screen_name={$via}'" . 
+					" class='{$class}' data-count='{$count}'" . 
+							$text_str . $related_str . $hashtag_str . $large_str . 
+						">Tweet to @{$via}</a>";
+		break;
+	}
 	
 	if( !empty( $css ) ) {
 		$out = "<span style='{$css}'>{$out}</span>";
@@ -844,6 +893,8 @@ add_action('admin_init', 'tweetbutton_admin_init');
 function tweetbutton_admin_init() {
 	add_settings_section('tweetbutton', __('Tweet Button Settings', 'tp'), 'tweetbutton_section_callback', 'tp');
 	add_settings_field('tweetbutton_source', __('Tweet Source', 'tp'), 'tweetbutton_source', 'tp', 'tweetbutton');
+	add_settings_field('tweetbutton_hashtag', __('Tweet Hashtag', 'tp'), 'tweetbutton_hashtag', 'tp', 'tweetbutton');
+	add_settings_field('tweetbutton_large', __('Tweet Button Size', 'tp'), 'tweetbutton_large', 'tp', 'tweetbutton');
 	add_settings_field('tweetbutton_position', __('Tweet Button Position', 'tp'), 'tweetbutton_position', 'tp', 'tweetbutton');
 	add_settings_field('tweetbutton_style', __('Tweet Button Style', 'tp'), 'tweetbutton_style', 'tp', 'tweetbutton');
 	add_settings_field('tweetbutton_css', __('Tweet Button CSS', 'tp'), 'tweetbutton_css', 'tp', 'tweetbutton');
@@ -858,6 +909,18 @@ function tweetbutton_source() {
 	$options = tp_options();
 	if (!$options['tweetbutton_source']) $options['tweetbutton_source'] = 'l0uy';
 	echo "<input type='text' id='tweetbutton-source' name='tp_options[tweetbutton_source]' value='{$options['tweetbutton_source']}' size='40' /> " . __('(Username that appears to be RT&#39;d)', 'tp');
+}
+
+function tweetbutton_hashtag() {
+	$options = tp_options();
+	if (!$options['tweetbutton_hashtag']) $options['tweetbutton_hashtag'] = '';
+	echo "<input type='text' id='tweetbutton-hashtag' name='tp_options[tweetbutton_hashtag]' value='{$options['tweetbutton_hashtag']}' size='40' /> " . __('(Hashtag to include in tweet)', 'tp');
+}
+
+function tweetbutton_large() {
+	$options = tp_options();
+	if (!$options['tweetbutton_large']) $options['tweetbutton_large'] = false;
+	echo "<input type='checkbox' id='tweetbutton-large' name='tp_options[tweetbutton_large]' value='true' " . checked($options['tweetbutton_large'],true,false) . " /> " . __('Large', 'tp');
 }
 
 function tweetbutton_position() {
@@ -910,6 +973,17 @@ function tweetbutton_validate_options($input) {
 		// only alnum and underscore allowed in twitter names
 		$input['tweetbutton_source'] = preg_replace('/[^a-zA-Z0-9_\s]/', '', $input['tweetbutton_source']);
 	}
+
+	if (!$input['tweetbutton_hashtag']) $input['tweetbutton_hashtag'] = '';
+	else {
+		// only alnum allowed in twitter hashtags
+		$input['tweetbutton_hashtag'] = preg_replace('/[^a-zA-Z0-9]/', '', $input['tweetbutton_hashtag']);
+	}
+
+	if( @$input['tweetbutton_large'] !== 'true' )
+		$input['tweetbutton_large'] = false;
+	else
+		$input['tweetbutton_large'] = true;
 
 	if (!$input['tweetbutton_css']) $input['tweetbutton_css'] = '';
 	else {
