@@ -1,380 +1,351 @@
-# Translation of the WordPress plugin TP 0.3 by Louy.
-# Copyright (C) 2010 Louy
-# This file is distributed under the same license as the TP package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2010.
-#
+# Translation of TweetPress in Arabic
+# This file is distributed under the same license as the TweetPress package.
 msgid ""
 msgstr ""
-"Project-Id-Version: TP 1.2\n"
-"Report-Msgid-Bugs-To: http://wordpress.org/tag/tp\n"
-"POT-Creation-Date: 2010-12-06 20:30+0200\n"
-"PO-Revision-Date: 2010-12-06 21:23+0200\n"
-"Last-Translator: Louy Alakkad <me@l0uy.com>\n"
-"Language-Team: Louy Alakkad <louy08@gmail.com>\n"
-"Language: \n"
+"PO-Revision-Date: 2011-12-25 18:38:18+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-Language: Arabic\n"
-"X-Poedit-Country: SYRIAN ARAB REPUBLIC\n"
-"X-Poedit-Basepath: .\n"
-"X-Poedit-SearchPath-0: ..\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+"X-Generator: GlotPress/0.1\n"
+"Project-Id-Version: TweetPress\n"
 
-#: tp.php:71
-#: tp.php:949
-msgid "%title% %url%[ifauthor] by %author%[/ifauthor]"
-msgstr "%title% %url%[ifauthor] بواسطة %author%[/ifauthor]"
-
-#: tp.php:109
-msgid "Sorry, TweetPress requires PHP 5 or higher. Ask your host how to enable PHP 5 as the default on your servers."
-msgstr "عذراً, لكن تويت برس يحتاج الإصدار 5 من PHP أو الأحدث. اطلب من مخدمك تمكين PHP 5 على موقعك."
-
-#: tp.php:118
-msgid "Settings"
-msgstr "الإعدادات"
-
-#: tp.php:120
-msgid "App Settings"
-msgstr "إعدادات التطبيق"
-
-#: tp.php:128
-#: tp.php:168
-msgid "TweetPress"
-msgstr "تويت بريس"
-
-#: tp.php:130
-#: tp.php:136
-msgid "TweetPress App"
-msgstr "تطبيق تويت بريس"
-
-#: tp.php:147
-#, php-format
-msgid "TweetPress needs to be configured on its <a href=\"%s\">app settings</a> page."
-msgstr "أنت بحاجة إلى ضبط تويت بريس في صفحة <a href=\"%s\">إعدادات التطبيق</a>."
-
-#: tp.php:155
-msgid "App Consumer Settings"
-msgstr "إعدادات التطبيق"
-
-#: tp.php:157
-msgid "Twitter Consumer Key"
-msgstr "Twitter Consumer Key"
-
-#: tp.php:159
-msgid "Twitter Consumer Secret"
-msgstr "Twitter Consumer Secret"
-
-#: tp.php:175
-#: tp.php:192
-msgid "Save Changes"
-msgstr "حفظ التغييرات"
-
-#: tp.php:185
-msgid "TweetPress App Options"
-msgstr "إعدادات تطبيق تويت بريس"
-
-#: tp.php:195
-msgid "If you like this plugin, Follow me <a href=\"http://twitter.com/l0uy\">@l0uy</a> for more updates."
-msgstr "إذا أعجبتك هذه الإضافة, تابعني <a href=\"http://twitter.com/l0uy\">@l0uy</a> على تويتر."
-
-#: tp.php:204
-msgid "To connect your site to Twitter, you will need a Twitter Application. If you have already created one, please insert your Consumer Key and Consumer Secret below."
-msgstr "لتوصيل موقعك بتويتر, أنت بحاجة لإعداد تطبيق تويتر لموقعك. إذا كنت قد قمت بذلك رجاءً أدخل الـ\"Consumer Key\" و الـ\"Consumer Secret\" في الأسفل."
-
-#: tp.php:205
-msgid "Can&#39;t find your key?"
-msgstr "ألا يمكنك العثور على إعداداتك؟"
-
-#: tp.php:207
-msgid "Get a list of your applications from here: <a target=\"_blank\" href=\"http://dev.twitter.com/apps\">Twitter Application List</a>"
-msgstr "إذهب إلى <a target=\"_blank\" href=\"http://dev.twitter.com/apps\">قائمة تطبيقاتك في تويتر</a>"
-
-#: tp.php:208
-msgid "Select the application you want, then copy and paste the Consumer Key and Consumer Secret from there."
-msgstr "اختر التطبيق الذي تريده, ثم قم بنسخ Consumer Key و Consumer Secret من هناك."
-
-#: tp.php:211
-msgid "<strong>Haven&#39;t created an application yet?</strong> Don&#39;t worry, it&#39;s easy!"
-msgstr "<strong>ألم تنشئ تطبيقاً بعد؟</strong> لا تقلق, الأمر سهل!"
-
-#: tp.php:213
-msgid "Go to this link to create your application: <a target=\"_blank\" href=\"http://dev.twitter.com/apps/new\">Twitter: Register an Application</a>"
-msgstr "إذهب إلى هذه الصفحة لتنشئ تطبيقك: <a target=\"_blank\" href=\"http://dev.twitter.com/apps/new\">Twitter: Register an Application</a>"
-
-#: tp.php:214
-msgid "Important Settings:"
-msgstr "إعدادات هامة:"
-
-#: tp.php:215
-msgid "Application Type must be set to \"Browser\"."
-msgstr "يجب تعيين Application Type إلى \"Browser\"."
-
-#: tp.php:216
-#, php-format
-msgid "Callback URL must be set to \"%s\"."
-msgstr "يجب تغيير Callback URL إلى  \"%s\"."
-
-#: tp.php:217
-msgid "Default Access type must be set to \"Read and Write\"."
-msgstr "يجب تعيين Default Access type إلى \"Read and Write\"."
-
-#: tp.php:220
-msgid "The other application fields can be set up any way you like."
-msgstr "يمكنك تعبئة باقى الحقول كما تريد."
-
-#: tp.php:221
-msgid "After creating the application, copy and paste the Consumer Key and Consumer Secret from the Application Details page."
-msgstr "بعد إنشاء التطبيق, إنسخ و الصق Consumer Key و Consumer Secret إلى هذه الصفحة."
-
-#: tp.php:230
-#: tp.php:236
-msgid "(required)"
-msgstr "(مطلوب)"
-
-#: tp.php:378
-#: tp.php:379
-msgid "Sign in with Twitter"
-msgstr "تسجيل الدخول باستخدام تويتر"
-
-#: tp.php:397
-msgid "TweetPress Comment function doesn't work with sites that require registration to comment."
-msgstr "تعليقات تويت بريس لا تعمل في المواقع التي تحتاج التسجيل للتعليق."
-
-#: tp.php:403
-msgid "Comment Settings"
-msgstr "إعدادات التعليقات"
-
-#: tp.php:404
-msgid "Allow Twitter users to comment?"
-msgstr "تمكين مستخدمي تويتر من التعليق؟"
-
-#: tp.php:405
-msgid "Comment Tweet Text"
-msgstr "نص تويت التعليق"
-
-#: tp.php:409
-#, php-format
-msgid "Allow twitter users to comment and set the tweet style, use % for shortlink."
-msgstr "السماح لمستخدمي تويتر بالتعليق, و تعيير شكل تويت التعليق, استخدم الرمز % محل الرابط."
-
-#: tp.php:411
-msgid "Warning: No URL Shortener plugin detected. Links used will be full permalinks."
-msgstr "تنبيه: لا يوجد أية إضافة لتقصير الروابط. سيتم استخدام الروابط الكاملة."
-
-#: tp.php:468
+#: tp.php:488
 msgid "Send Comment to Twitter"
 msgstr "إرسال التعليق إلى تويتر"
 
-#: tp.php:484
+#: tp.php:504
 msgid "You are connected with your Twitter account."
 msgstr "انت متصل باستخدام حسابك في تويتر."
 
-#: tp.php:485
+#: tp.php:505
 msgid "Logout"
 msgstr "تسجيل الخروج"
 
-#: tp.php:614
+#: tp.php:643
 msgid "Twitter"
 msgstr "تويتر"
 
-#: tp.php:622
+#: tp.php:651
 msgid "Connected as "
 msgstr "متصل باسم "
 
-#: tp.php:628
+#: tp.php:657
 msgid "Disconnect"
 msgstr "إلغاء التوصيل"
 
-#: tp.php:700
+#: tp.php:729
 msgid "<strong>Error</strong>: Twitter user not recognized."
 msgstr "<strong>خطأ</strong>: لم يتم التعرف على مستخدم تويتر."
 
-#: tp.php:806
+#: tp.php:894
 msgid "Tweet Button Settings"
 msgstr "إعدادات زر التويت"
 
-#: tp.php:807
+#: tp.php:895
 msgid "Tweet Source"
 msgstr "مصدر التويت"
 
-#: tp.php:808
-msgid "Tweet Button Position"
-msgstr "موقع زر التويت"
+#: tp.php:896
+msgid "Tweet Hashtag"
+msgstr "وسم التويت"
 
-#: tp.php:809
+#: tp.php:897
+msgid "Tweet Button Size"
+msgstr "حجم زر التويت"
+
+#: tp.php:898
+msgid "Tweet Button Position"
+msgstr "مكان زر التويت"
+
+#: tp.php:899
 msgid "Tweet Button Style"
 msgstr "شكل زر التويت"
 
-#: tp.php:811
+#: tp.php:900
 msgid "Tweet Button CSS"
 msgstr "CSS زر التويت"
 
-#: tp.php:812
+#: tp.php:901
 msgid "Tweet Button Single Pages Only"
 msgstr "زر التويت على الصفحات المفردة فقط"
 
-#: tp.php:816
+#: tp.php:905
 msgid "Choose where you want the Tweetbutton button to add the button in your content."
 msgstr "إختر أين تريد أن يظهر زر التويت."
 
-#: tp.php:822
+#: tp.php:911
 msgid "(Username that appears to be RT&#39;d)"
 msgstr "(اسم المستخدم الذي سيظهر في التويت)"
 
-#: tp.php:829
+#: tp.php:917
+msgid "(Hashtag to include in tweet)"
+msgstr "(وسم يوضع في التويت)"
+
+#: tp.php:923
+msgid "Large"
+msgstr "كبير"
+
+#: tp.php:930
 msgid "Before the content of your post"
 msgstr "قبل محتويات تدوينتك"
 
-#: tp.php:830
+#: tp.php:931
 msgid "After the content of your post"
 msgstr "بعد محتويات تدوينتك"
 
-#: tp.php:831
+#: tp.php:932
 msgid "Before AND After the content of your post"
 msgstr "قبل و بعد محتويات تدوينتك"
 
-#: tp.php:832
+#: tp.php:933
 msgid "Manually add the button to your theme or posts (use the tweetbutton_button function in your theme, or the [tweetbutton] shortcode in your posts)"
 msgstr "يدوياً باستخدام tweetbutton_button() في القالب و [tweetbutton] داخل نص التدوينة"
 
-#: tp.php:841
+#: tp.php:942
 msgid "None"
 msgstr "بدون عدد"
 
-#: tp.php:842
+#: tp.php:943
 msgid "Horizonal"
 msgstr "افقي"
 
-#: tp.php:843
+#: tp.php:944
 msgid "Vertical"
 msgstr "عمودي"
 
-#: tp.php:851
+#: tp.php:952
 msgid "the css style of the tweet button."
 msgstr "الـCSS الخاص بزر التويت."
 
-#: tp.php:857
+#: tp.php:958
 msgid "show tweet button only on single pages?."
 msgstr "عرض زر التويت على الصفحات المفردة فقط?"
 
-#: tp.php:896
+#: tp.php:1008
 msgid "Twitter Publisher"
 msgstr "النشر إلى تويتر"
 
-#: tp.php:902
+#: tp.php:1014
 msgid "Publish Settings"
 msgstr "خيارات النشر"
 
-#: tp.php:903
+#: tp.php:1015
 msgid "Automatic Publishing"
 msgstr "نشر تلقائي"
 
-#: tp.php:904
+#: tp.php:1016
 msgid "Publish Tweet Text"
 msgstr "نص تويت النشر"
 
-#: tp.php:909
+#: tp.php:1021
 msgid "Settings for the Publish function. The manual Twitter Publishing buttons can be found on the Edit Post screen, after you publish a post. If you can&#39;t find them, try scrolling down or seeing if you have the box disabled in the Options dropdown."
 msgstr "إعدادات عملية النشر. أزرار النشر اليدوي توجد في صفحة تعديل التدوينة, بعد نشرها. إذا لم تتمكن من العثور على الزر, تحقق من إعدادات الشاشة."
 
-#: tp.php:916
+#: tp.php:1028
 msgid "Automatically Tweet on Publish:"
 msgstr "إرسال تويت تلقائياً عند النشر:"
 
-#: tp.php:919
+#: tp.php:1031
 msgid "Currently logged in as:"
 msgstr "الدخول مسجل باسم:"
 
-#: tp.php:922
+#: tp.php:1034
 msgid "Autotweet set to Twitter User:"
 msgstr "مستخدم التويت التلقائي:"
 
-#: tp.php:952
+#: tp.php:1064
 msgid "Use %title% for the post title."
 msgstr "استخدم %title% مكان عنوان التدوينة."
 
-#: tp.php:953
-#, php-format
+#: tp.php:1065
 msgid "Use %url% for the post link (or shortlink)."
 msgstr "استخدم %url% مكان رابط التدوينة."
 
-#: tp.php:954
+#: tp.php:1066
 msgid "Use %author% for the author twitter username (@l0uy for example)."
 msgstr "استخدم %author% مكان اسم الكاتب (@l0uy مثلاً)."
 
-#: tp.php:955
+#: tp.php:1067
 msgid "Use [ifauthor][/ifauthor] to check if the author have a twitter account."
 msgstr "استخدم [ifauthor][/ifauthor] للتحقق من إذا كان المستخدم يمتلك حساب تويتر."
 
-#: tp.php:961
+#: tp.php:1073
 msgid "You do not have sufficient permissions to manage options for this blog."
 msgstr "لا تملك الصلاحيات الكافية لتغيير إعدادات هذه المدونة."
 
-#: tp.php:981
+#: tp.php:1093
 msgid "Why would you put private posts on Twitter, for all to see?"
 msgstr "لماذا قد تضع تدوينة خاصة على تويتر, ليراها الجميع؟"
 
-#: tp.php:986
+#: tp.php:1098
 msgid "After publishing the post, you can send it to Twitter from here."
 msgstr "بعد نشر التدوينة, يمكنك إرسالها إلى تويتر من هنا."
 
-#: tp.php:997
+#: tp.php:1109
 msgid "Tweet this:"
 msgstr "شارك على تويتر:"
 
-#: tp.php:1122
-#: tp.php:1123
+#: tp.php:1234 tp.php:1235
 msgid "Twitter Follow Button"
 msgstr "زر المتابعة على تويتر"
 
-#: tp.php:1158
+#: tp.php:1270
 msgid "Title:"
 msgstr "الاسم:"
 
-#: tp.php:1161
+#: tp.php:1273
 msgid "Username:"
 msgstr "اسم المستخدم:"
+
+msgid "TP - TweetPress"
+msgstr "تويت بريس"
+
+msgid "All the tools you need to integrate your wordpress and twitter."
+msgstr "كل الأدوات التي تحتاجها لتوصيل ووردبرس بتويتر."
+
+msgid "Louy"
+msgstr "لؤي"
+
+msgid "http://l0uy.com/"
+msgstr "http://l0uy.com/"
 
 #: wp-oauth.php:36
 msgid "OAuth site not recognized!"
 msgstr "لم يتم التعرف على موقع OAuth!"
 
-#. Plugin Name of the plugin/theme
-msgid "TP - TweetPress"
+#: tp.php:34
+msgid "Sorry, TweetPress requires PHP 5 or higher. Ask your host how to enable PHP 5 as the default on your servers."
+msgstr "عذراً, لكن تويت برس يحتاج الإصدار 5 من PHP أو الأحدث. اطلب من مخدمك تمكين PHP 5 على موقعك."
+
+#: tp.php:80 tp.php:1061
+msgid "%title% %url%[ifauthor] by %author%[/ifauthor]"
+msgstr "%title% %url%[ifauthor] بواسطة %author%[/ifauthor]"
+
+#: tp.php:115
+msgid "Settings"
+msgstr "الإعدادات"
+
+#: tp.php:117
+msgid "App Settings"
+msgstr "إعدادات التطبيق"
+
+#: tp.php:130 tp.php:170
+msgid "TweetPress"
 msgstr "تويت بريس"
 
-#. Description of the plugin/theme
-msgid "All the tools you need to integrate your wordpress and twitter."
-msgstr "كل الأدوات التي تحتاجها لتوصيل ووردبرس بتويتر."
+#: tp.php:132 tp.php:138
+msgid "TweetPress App"
+msgstr "تطبيق تويت بريس"
 
-#. Author of the plugin/theme
-msgid "Louy"
-msgstr "لؤي"
+#: tp.php:149
+msgid "TweetPress needs to be configured on its <a href=\"%s\">app settings</a> page."
+msgstr "أنت بحاجة إلى ضبط تويت بريس في صفحة <a href=\"%s\">إعدادات التطبيق</a>."
 
-#. Author URI of the plugin/theme
-msgid "http://l0uy.com"
-msgstr "http://l0uy.com"
+#: tp.php:157
+msgid "App Consumer Settings"
+msgstr "إعدادات التطبيق"
 
-#~ msgid "Autotweet set to Twitter User: <strong>%s</strong>"
-#~ msgstr "مستخدم التويت التلقائي الحالي: <strong>%s</strong>"
-#~ msgid ""
-#~ "To auto-publish new posts to any Twitter account, click this button and "
-#~ "then log into that account to give the plugin access."
-#~ msgstr ""
-#~ "لاستخدام النشر التلقائي على أي مستخدم تويتر, إضغط على هذا الزر و سجل "
-#~ "دخولك باستخدام ذلك الحساب لإعطاء الإضافة الصلاحيات المطلوبة."
-#~ msgid "Authenticate for auto-tweeting: %s"
-#~ msgstr "المصادقة للتويت التلقائي: %s"
-#~ msgid ""
-#~ "Afterwards, you can use this button to log back into your own normal "
-#~ "account, if you are posting to a different account than your normal one."
-#~ msgstr ""
-#~ "بعد ذلك, استخدم هذا الزر لتسجيل دخولك لحسابك الشخصي, إذا كنت تستخدم حساباً "
-#~ "مختلفاً لنشر التويت التلقائي."
-#~ msgid "Normal authentication: %s"
-#~ msgstr "المصادقة العادية: %s"
-#~ msgid "Options related to the TweetPress plugin."
-#~ msgstr "الخيارات المرتبطة بإضافة تويت بريس."
-#~ msgid "TP"
-#~ msgstr "TP"
+#: tp.php:159
+msgid "Twitter Consumer Key"
+msgstr "Twitter Consumer Key"
 
+#: tp.php:161
+msgid "Twitter Consumer Secret"
+msgstr "Twitter Consumer Secret"
+
+#: tp.php:177 tp.php:208
+msgid "Save Changes"
+msgstr "حفظ التغييرات"
+
+#: tp.php:196
+msgid "Options saved."
+msgstr "تم حفظ الإعدادات."
+
+#: tp.php:200
+msgid "TweetPress App Options"
+msgstr "إعدادات تطبيق تويت بريس"
+
+#: tp.php:211
+msgid "If you like this plugin, Follow me <a href=\"http://twitter.com/l0uy\">@l0uy</a> for more updates."
+msgstr "إذا أعجبتك هذه الإضافة, تابعني <a href=\"http://twitter.com/l0uy\">@l0uy</a> على تويتر."
+
+#: tp.php:220
+msgid "To connect your site to Twitter, you will need a Twitter Application. If you have already created one, please insert your Consumer Key and Consumer Secret below."
+msgstr "لتوصيل موقعك بتويتر, أنت بحاجة لإعداد تطبيق تويتر لموقعك. إذا كنت قد قمت بذلك رجاءً أدخل الـ\"Consumer Key\" و الـ\"Consumer Secret\" في الأسفل."
+
+#: tp.php:221
+msgid "Can&#39;t find your key?"
+msgstr "ألا يمكنك العثور على إعداداتك؟"
+
+#: tp.php:223
+msgid "Get a list of your applications from here: <a target=\"_blank\" href=\"http://dev.twitter.com/apps\">Twitter Application List</a>"
+msgstr "إذهب إلى <a target=\"_blank\" href=\"http://dev.twitter.com/apps\">قائمة تطبيقاتك في تويتر</a>"
+
+#: tp.php:224
+msgid "Select the application you want, then copy and paste the Consumer Key and Consumer Secret from there."
+msgstr "اختر التطبيق الذي تريده, ثم قم بنسخ Consumer Key و Consumer Secret من هناك."
+
+#: tp.php:227
+msgid "<strong>Haven&#39;t created an application yet?</strong> Don&#39;t worry, it&#39;s easy!"
+msgstr "<strong>ألم تنشئ تطبيقاً بعد؟</strong> لا تقلق, الأمر سهل!"
+
+#: tp.php:229
+msgid "Go to this link to create your application: <a target=\"_blank\" href=\"http://dev.twitter.com/apps/new\">Twitter: Register an Application</a>"
+msgstr "إذهب إلى هذه الصفحة لتنشئ تطبيقك: <a target=\"_blank\" href=\"http://dev.twitter.com/apps/new\">Twitter: Register an Application</a>"
+
+#: tp.php:230
+msgid "Important Settings:"
+msgstr "إعدادات هامة:"
+
+#: tp.php:231
+msgid "Application Type must be set to \"Browser\"."
+msgstr "يجب تعيين Application Type إلى \"Browser\"."
+
+#: tp.php:232
+msgid "Callback URL must be set to \"%s\"."
+msgstr "يجب تغيير Callback URL إلى  \"%s\"."
+
+#: tp.php:233
+msgid "Default Access type must be set to \"Read and Write\"."
+msgstr "يجب تعيين Default Access type إلى \"Read and Write\"."
+
+#: tp.php:236
+msgid "The other application fields can be set up any way you like."
+msgstr "يمكنك تعبئة باقى الحقول كما تريد."
+
+#: tp.php:237
+msgid "After creating the application, copy and paste the Consumer Key and Consumer Secret from the Application Details page."
+msgstr "بعد إنشاء التطبيق, إنسخ و الصق Consumer Key و Consumer Secret إلى هذه الصفحة."
+
+#: tp.php:246 tp.php:252
+msgid "(required)"
+msgstr "(مطلوب)"
+
+#: tp.php:394 tp.php:395
+msgid "Sign in with Twitter"
+msgstr "تسجيل الدخول باستخدام تويتر"
+
+#: tp.php:418
+msgid "TweetPress Comment function doesn&#39;t work with sites that require registration to comment."
+msgstr "ميزة التعليقات في تويت بريس لا تعمل مع المواقع التي تتطلب أن تسجل فيها كي تقوم بالتعليق."
+
+#: tp.php:423
+msgid "Comment Settings"
+msgstr "إعدادات التعليقات"
+
+#: tp.php:424
+msgid "Allow Twitter users to comment?"
+msgstr "تمكين مستخدمي تويتر من التعليق؟"
+
+#: tp.php:425
+msgid "Comment Tweet Text"
+msgstr "نص تويت التعليق"
+
+#: tp.php:429
+msgid "Allow twitter users to comment and set the tweet style, use % for shortlink."
+msgstr "السماح لمستخدمي تويتر بالتعليق, و تعيير شكل تويت التعليق, استخدم الرمز % محل الرابط."
+
+#: tp.php:431
+msgid "Warning: No URL Shortener plugin detected. Links used will be full permalinks."
+msgstr "تنبيه: لا يوجد أية إضافة لتقصير الروابط. سيتم استخدام الروابط الكاملة."
