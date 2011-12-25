@@ -738,10 +738,7 @@ function tp_logout() {
 /**
  * TweetPress Tweet Button:
  */
-global $tweetbutton_defaults, $tweetbutton_is_displayed;
-$tweetbutton_defaults = array(
-	'id'=>0,
-);
+global $tweetbutton_is_displayed;
 $tweetbutton_is_displayed = false;
 
 /**
@@ -751,42 +748,49 @@ $tweetbutton_is_displayed = false;
  * @param int $post_id An optional post ID.
  */
 function get_tweetbutton($args='') {
-	global $tweetbutton_defaults, $tweetbutton_is_displayed;
+	global $tweetbutton_is_displayed;
 	$tweetbutton_is_displayed = true;
-	$args = wp_parse_args($tweetbutton_defaults, $args);
+	
+	$options = tp_options();
+	
+	$defaults = array(
+		'id' => 0,
+		'count' => $options['tweetbutton_style'],
+		'css' => $options['tweetbutton_css'],
+	);
+	
+	$args = wp_parse_args($args,$defaults);
+	
+	$source = $options['tweetbutton_source'];
 	
 	if( !$args['id'] ) {
 		global $post;
 		$id = $post->ID;
 	}
-
-	$options = tp_options();
-	$style = $options['tweetbutton_style'];
-	$css = $options['tweetbutton_css'];
 	
 	extract($args);
-	
-	$source = $options['tweetbutton_source'];
 	
 	$related = $source;
 	$author = get_the_author_meta('twuid');
 	if( $author && $source != $author ) {
 		$related .= ':' . $author;
 	}
-
+	
+	$related = apply_filters('tp_tweetbutton_related', $related);
+	
 	$url = esc_attr(get_permalink($id));
 	$the_post = get_post($id);
 	$text = esc_attr(strip_tags($the_post->post_title));;
-
+	
 	if (!empty($related)) $related = " data-related='{$related}'";
-
-	$out = "<a href='http://twitter.com/share' class='twitter-share-button' data-text='{$text}' data-url='{$url}' data-count='{$style}' data-via='{$source}'{$related}>Tweet</a>";
+	
+	$out = "<a href='http://twitter.com/share' class='twitter-share-button' data-text='{$text}' data-url='{$url}' data-count='{$count}' data-via='{$source}'{$related}>Tweet</a>";
 	
 	if( !empty( $css ) ) {
 		$out = "<span style='{$css}'>{$out}</span>";
 	}
 	
-	return $out;
+	return apply_filters('tp_tweetbutton', $out, $args);
 }
 
 function tweetbutton($args) {
@@ -1206,4 +1210,3 @@ add_action('widgets_init', create_function('', 'return register_widget("TP_Follo
  * Example use: do_action('tp_follow', 'l0uy');
  */
 add_filter('tp_follow', 'tp_follow_button');
-
