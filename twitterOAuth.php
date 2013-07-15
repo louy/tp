@@ -18,11 +18,11 @@ class TwitterOAuth {
   /* Contains the last API call. */
   public $url;
   /* Set up the API root URL. */
-  public $host = "https://api.twitter.com/1/";
+  public $host = "https://api.twitter.com/1.1/";
   /* Set timeout default. */
   public $timeout = 30;
   /* Set connect timeout. */
-  public $connecttimeout = 30;
+  public $connecttimeout = 30; 
   /* Verify SSL Cert. */
   public $ssl_verifypeer = FALSE;
   /* Respons format. */
@@ -43,8 +43,8 @@ class TwitterOAuth {
    * Set API URLS
    */
   function accessTokenURL()  { return 'https://api.twitter.com/oauth/access_token'; }
-  function authenticateURL() { return 'https://twitter.com/oauth/authenticate'; }
-  function authorizeURL()    { return 'https://twitter.com/oauth/authorize'; }
+  function authenticateURL() { return 'https://api.twitter.com/oauth/authenticate'; }
+  function authorizeURL()    { return 'https://api.twitter.com/oauth/authorize'; }
   function requestTokenURL() { return 'https://api.twitter.com/oauth/request_token'; }
 
   /**
@@ -72,11 +72,9 @@ class TwitterOAuth {
    *
    * @returns a key/value array containing oauth_token and oauth_token_secret
    */
-  function getRequestToken($oauth_callback = NULL) {
+  function getRequestToken($oauth_callback) {
     $parameters = array();
-    if (!empty($oauth_callback)) {
-      $parameters['oauth_callback'] = $oauth_callback;
-    }
+    $parameters['oauth_callback'] = $oauth_callback; 
     $request = $this->oAuthRequest($this->requestTokenURL(), 'GET', $parameters);
     $token = OAuthUtil::parse_parameters($request);
     $this->token = new OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
@@ -96,7 +94,7 @@ class TwitterOAuth {
       return $this->authorizeURL() . "?oauth_token={$token}";
     } else {
        return $this->authenticateURL() . "?oauth_token={$token}";
-  }
+    }
   }
 
   /**
@@ -108,11 +106,9 @@ class TwitterOAuth {
    *                "user_id" => "9436992",
    *                "screen_name" => "abraham")
    */
-  function getAccessToken($oauth_verifier = FALSE) {
+  function getAccessToken($oauth_verifier) {
     $parameters = array();
-    if (!empty($oauth_verifier)) {
-      $parameters['oauth_verifier'] = $oauth_verifier;
-  }
+    $parameters['oauth_verifier'] = $oauth_verifier;
     $request = $this->oAuthRequest($this->accessTokenURL(), 'GET', $parameters);
     $token = OAuthUtil::parse_parameters($request);
     $this->token = new OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
@@ -127,7 +123,7 @@ class TwitterOAuth {
    *                "user_id" => "9436992",
    *                "screen_name" => "abraham",
    *                "x_auth_expires" => "0")
-   */
+   */  
   function getXAuthToken($username, $password) {
     $parameters = array();
     $parameters['x_auth_username'] = $username;
@@ -138,39 +134,39 @@ class TwitterOAuth {
     $this->token = new OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
     return $token;
   }
-  
+
   /**
    * GET wrapper for oAuthRequest.
    */
-    function get($url, $parameters = array()) {
-        $response = $this->oAuthRequest($url, 'GET', $parameters);
-        if ($this->format === 'json' && $this->decode_json) {
-            return json_decode($response);
-        }
-        return $response;
+  function get($url, $parameters = array()) {
+    $response = $this->oAuthRequest($url, 'GET', $parameters);
+    if ($this->format === 'json' && $this->decode_json) {
+      return json_decode($response);
     }
-
+    return $response;
+  }
+  
   /**
    * POST wrapper for oAuthRequest.
    */
-    function post($url, $parameters = array()) {
-        $response = $this->oAuthRequest($url, 'POST', $parameters);
-        if ($this->format === 'json' && $this->decode_json) {
-            return json_decode($response);
-        }
-        return $response;
+  function post($url, $parameters = array()) {
+    $response = $this->oAuthRequest($url, 'POST', $parameters);
+    if ($this->format === 'json' && $this->decode_json) {
+      return json_decode($response);
     }
+    return $response;
+  }
 
   /**
    * DELETE wrapper for oAuthReqeust.
    */
-    function delete($url, $parameters = array()) {
-        $response = $this->oAuthRequest($url, 'DELETE', $parameters);
-        if ($this->format === 'json' && $this->decode_json) {
-            return json_decode($response);
-        }
-        return $response;
+  function delete($url, $parameters = array()) {
+    $response = $this->oAuthRequest($url, 'DELETE', $parameters);
+    if ($this->format === 'json' && $this->decode_json) {
+      return json_decode($response);
     }
+    return $response;
+  }
 
   /**
    * Format and sign an OAuth / API request
@@ -196,22 +192,50 @@ class TwitterOAuth {
    */
   function http($url, $method, $postfields = NULL) {
     $this->http_info = array();
+    $ci = curl_init();
+    /* Curl settings */
+    curl_setopt($ci, CURLOPT_USERAGENT, $this->useragent);
+    curl_setopt($ci, CURLOPT_CONNECTTIMEOUT, $this->connecttimeout);
+    curl_setopt($ci, CURLOPT_TIMEOUT, $this->timeout);
+    curl_setopt($ci, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ci, CURLOPT_HTTPHEADER, array('Expect:'));
+    curl_setopt($ci, CURLOPT_SSL_VERIFYPEER, $this->ssl_verifypeer);
+    curl_setopt($ci, CURLOPT_HEADERFUNCTION, array($this, 'getHeader'));
+    curl_setopt($ci, CURLOPT_HEADER, FALSE);
 
-    $args = array(
-        'timeout' => $this->timeout,
-        'user-agent' => $this->useragent,
-        'body' => wp_parse_args($postfields),
-        'method' => $method
-    );
+    switch ($method) {
+      case 'POST':
+        curl_setopt($ci, CURLOPT_POST, TRUE);
+        if (!empty($postfields)) {
+          curl_setopt($ci, CURLOPT_POSTFIELDS, $postfields);
+        }
+        break;
+      case 'DELETE':
+        curl_setopt($ci, CURLOPT_CUSTOMREQUEST, 'DELETE');
+        if (!empty($postfields)) {
+          $url = "{$url}?{$postfields}";
+        }
+    }
 
-    $response = wp_remote_request( $url, $args);
-    $this->last_api_call = $url;
+    curl_setopt($ci, CURLOPT_URL, $url);
+    $response = curl_exec($ci);
+    $this->http_code = curl_getinfo($ci, CURLINFO_HTTP_CODE);
+    $this->http_info = array_merge($this->http_info, curl_getinfo($ci));
+    $this->url = $url;
+    curl_close ($ci);
+    return $response;
+  }
 
-    if ( is_wp_error( $response ) )
-        return false;
-    
-    $this->http_status = $response['response']['code'];
-
-	return $response['body'];
-  } 
+  /**
+   * Get the header info to store.
+   */
+  function getHeader($ch, $header) {
+    $i = strpos($header, ':');
+    if (!empty($i)) {
+      $key = str_replace('-', '_', strtolower(substr($header, 0, $i)));
+      $value = trim(substr($header, $i + 2));
+      $this->http_header[$key] = $value;
+    }
+    return strlen($header);
+  }
 }

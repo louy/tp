@@ -19,6 +19,7 @@ add your keys and copy the following 2 lines to your wp-config.php
 load_plugin_textdomain( 'tp', false, dirname( plugin_basename( __FILE__ ) ) . '/po/' );
 
 define('TP_VERSION', '1.3.5');
+define('TP_TWITTER_API_VERSION', '1.1');
 
 require_once dirname(__FILE__).'/wp-oauth.php';
 
@@ -496,10 +497,10 @@ function tp_comm_footer_script() {
 }
 
 function tp_comm_get_display() {
-	$tw = tp_get_credentials();
+	$tw = tp_get_credentials(true);
 	if ($tw) {
 		echo '<div id="tw-user">'.
-			 '<img src="http://api.twitter.com/1/users/profile_image/'.$tw->screen_name.'?size=bigger" width="96" height="96" id="tw-avatar" class="avatar" />'.
+			 '<img src="' . str_replace('normal', 'bigger', $tw->profile_image_url_https) . '" width="73" height="73" id="tw-avatar" class="avatar" />'.
 			 '<h3 id="tw-msg">Hi '.$tw->name.'!</h3>'.
 			 '<p>'.__('You are connected with your Twitter account.', 'tp').'</p>'.
 			 apply_filters('tp_user_logout','<a href="?twitter-logout=1" id="tw-logout">'.__('Logout', 'tp').'</a>').
@@ -568,17 +569,43 @@ if( !function_exists('alt_comment_login') ) {
 }
 
 // generate avatar code for Twitter user comments
-add_filter('get_avatar','tp_comm_avatar', 10, 5);
+//add_filter('get_avatar','tp_comm_avatar', 10, 5);
 function tp_comm_avatar($avatar, $id_or_email, $size = '96', $default = '', $alt = false) {
+	
 	// check to be sure this is for a comment
 	if ( !is_object($id_or_email) || !isset($id_or_email->comment_ID) || $id_or_email->user_id)
 		 return $avatar;
-
-	// check for twuid comment meta
-	$twuid = get_comment_meta($id_or_email->comment_ID, 'twuid', true);
-	if ($twuid) {
-		// return the avatar code
-		$avatar = "<img class='avatar avatar-{$size} twitter-avatar' src='http://api.twitter.com/1/users/profile_image/{$twuid}?size=bigger' width='{$size}' height='{$size}' />";
+	
+	// check for tp comment meta
+	$twimg = get_comment_meta($id_or_email->comment_ID, 'twimg', true);
+	if( !$twimg ) {
+		$twuid = get_comment_meta($id_or_email->comment_ID, 'twuid', true);
+		if ($twuid) {
+			// return the avatar code
+			$avatar = "<img class='avatar avatar-{$size} twitter-avatar' src='http://api.twitter.com/" . TP_TWITTER_API_VERSION . "/users/profile_image/{$twuid}?size=bigger' width='{$size}' height='{$size}' />";
+			
+			$request = tp_do_request('users/show', array('screen_name='.$twuid), 'POST');
+			
+			//...
+		}
+	}
+	
+	if( $twimg ) {
+		// sizes
+		switch( true ) {
+			case $size > 73:
+				$imgsize = 'original';
+				break;
+			case $size > 48:
+				$imgsize = 'normal';
+				break;
+			case $size > 24:
+			default:
+				$imgsize = 'mini';
+				break;
+		}
+		$img = str_replace('normal', $imgsize, $twimg);
+		$avatar = "<img class='avatar avatar-{$size} twitter-avatar' src='$img' width='{$size}' height='{$size}' />";
 	}
 
 	return $avatar;
@@ -650,7 +677,7 @@ function tp_login_profile_page($profile) {
 	} else { ?>
 		<td><p><?php _e('Connected as ', 'tp'); ?></p>
 			<table><tr><td>
-				<img src='http://api.twitter.com/1/users/profile_image/<?php echo $twuid; ?>?size=bigger' width='32' height='32' />
+				<img src='http://api.twitter.com/<?php echo TP_TWITTER_API_VERSION; ?>/users/profile_image/<?php echo $twuid; ?>?size=bigger' width='32' height='32' />
 			</td><td>
 				<strong><a href='http://twitter.com/<?php echo $twuid; ?>'><?php echo $twuid; ?></a></strong>
 			</td></tr><tr><td colspan="2">
