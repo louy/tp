@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TP - TweetPress 1.4\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/tp\n"
-"POT-Creation-Date: 2013-07-15 16:10:47+00:00\n"
+"POT-Creation-Date: 2013-07-15 16:12:47+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,7 +13,9 @@ msgstr ""
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
 #: tp.php:35
-msgid "Sorry, TweetPress requires PHP 5 or higher. Ask your host how to enable PHP 5 as the default on your servers."
+msgid ""
+"Sorry, TweetPress requires PHP 5 or higher. Ask your host how to enable PHP "
+"5 as the default on your servers."
 msgstr ""
 
 #: tp.php:81 tp.php:1088
@@ -37,7 +39,9 @@ msgid "TweetPress App"
 msgstr ""
 
 #: tp.php:150
-msgid "TweetPress needs to be configured on its <a href=\"%s\">app settings</a> page."
+msgid ""
+"TweetPress needs to be configured on its <a href=\"%s\">app settings</a> "
+"page."
 msgstr ""
 
 #: tp.php:158
@@ -65,11 +69,16 @@ msgid "TweetPress App Options"
 msgstr ""
 
 #: tp.php:212
-msgid "If you like this plugin, Follow me <a href=\"http://twitter.com/l0uy\">@l0uy</a> for more updates."
+msgid ""
+"If you like this plugin, Follow me <a href=\"http://twitter.com/l0uy"
+"\">@l0uy</a> for more updates."
 msgstr ""
 
 #: tp.php:221
-msgid "To connect your site to Twitter, you will need a Twitter Application. If you have already created one, please insert your Consumer Key and Consumer Secret below."
+msgid ""
+"To connect your site to Twitter, you will need a Twitter Application. If you "
+"have already created one, please insert your Consumer Key and Consumer "
+"Secret below."
 msgstr ""
 
 #: tp.php:222
@@ -77,19 +86,27 @@ msgid "Can&#39;t find your key?"
 msgstr ""
 
 #: tp.php:224
-msgid "Get a list of your applications from here: <a target=\"_blank\" href=\"http://dev.twitter.com/apps\">Twitter Application List</a>"
+msgid ""
+"Get a list of your applications from here: <a target=\"_blank\" href="
+"\"http://dev.twitter.com/apps\">Twitter Application List</a>"
 msgstr ""
 
 #: tp.php:225
-msgid "Select the application you want, then copy and paste the Consumer Key and Consumer Secret from there."
+msgid ""
+"Select the application you want, then copy and paste the Consumer Key and "
+"Consumer Secret from there."
 msgstr ""
 
 #: tp.php:228
-msgid "<strong>Haven&#39;t created an application yet?</strong> Don&#39;t worry, it&#39;s easy!"
+msgid ""
+"<strong>Haven&#39;t created an application yet?</strong> Don&#39;t worry, "
+"it&#39;s easy!"
 msgstr ""
 
 #: tp.php:230
-msgid "Go to this link to create your application: <a target=\"_blank\" href=\"http://dev.twitter.com/apps/new\">Twitter: Register an Application</a>"
+msgid ""
+"Go to this link to create your application: <a target=\"_blank\" href="
+"\"http://dev.twitter.com/apps/new\">Twitter: Register an Application</a>"
 msgstr ""
 
 #: tp.php:231
@@ -113,7 +130,9 @@ msgid "The other application fields can be set up any way you like."
 msgstr ""
 
 #: tp.php:238
-msgid "After creating the application, copy and paste the Consumer Key and Consumer Secret from the Application Details page."
+msgid ""
+"After creating the application, copy and paste the Consumer Key and Consumer "
+"Secret from the Application Details page."
 msgstr ""
 
 #: tp.php:247 tp.php:253
@@ -125,7 +144,9 @@ msgid "Sign in with Twitter"
 msgstr ""
 
 #: tp.php:419
-msgid "TweetPress Comment function doesn&#39;t work with sites that require registration to comment."
+msgid ""
+"TweetPress Comment function doesn&#39;t work with sites that require "
+"registration to comment."
 msgstr ""
 
 #: tp.php:424
@@ -141,11 +162,14 @@ msgid "Comment Tweet Text"
 msgstr ""
 
 #: tp.php:430
-msgid "Allow twitter users to comment and set the tweet style, use % for shortlink."
+msgid ""
+"Allow twitter users to comment and set the tweet style, use % for shortlink."
 msgstr ""
 
 #: tp.php:432
-msgid "Warning: No URL Shortener plugin detected. Links used will be full permalinks."
+msgid ""
+"Warning: No URL Shortener plugin detected. Links used will be full "
+"permalinks."
 msgstr ""
 
 #: tp.php:489
@@ -213,7 +237,9 @@ msgid "Tweet Button Single Pages Only"
 msgstr ""
 
 #: tp.php:932
-msgid "Choose where you want the Tweetbutton button to add the button in your content."
+msgid ""
+"Choose where you want the Tweetbutton button to add the button in your "
+"content."
 msgstr ""
 
 #: tp.php:938
@@ -241,7 +267,9 @@ msgid "Before AND After the content of your post"
 msgstr ""
 
 #: tp.php:960
-msgid "Manually add the button to your theme or posts (use the tweetbutton_button function in your theme, or the [tweetbutton] shortcode in your posts)"
+msgid ""
+"Manually add the button to your theme or posts (use the tweetbutton_button "
+"function in your theme, or the [tweetbutton] shortcode in your posts)"
 msgstr ""
 
 #: tp.php:969
@@ -281,7 +309,11 @@ msgid "Publish Tweet Text"
 msgstr ""
 
 #: tp.php:1048
-msgid "Settings for the Publish function. The manual Twitter Publishing buttons can be found on the Edit Post screen, after you publish a post. If you can&#39;t find them, try scrolling down or seeing if you have the box disabled in the Options dropdown."
+msgid ""
+"Settings for the Publish function. The manual Twitter Publishing buttons can "
+"be found on the Edit Post screen, after you publish a post. If you can&#39;t "
+"find them, try scrolling down or seeing if you have the box disabled in the "
+"Options dropdown."
 msgstr ""
 
 #: tp.php:1055
@@ -309,7 +341,8 @@ msgid "Use %author% for the author twitter username (@l0uy for example)."
 msgstr ""
 
 #: tp.php:1094
-msgid "Use [ifauthor][/ifauthor] to check if the author have a twitter account."
+msgid ""
+"Use [ifauthor][/ifauthor] to check if the author have a twitter account."
 msgstr ""
 
 #: tp.php:1100
@@ -343,6 +376,7 @@ msgstr ""
 #: wp-oauth.php:36
 msgid "OAuth site not recognized!"
 msgstr ""
+
 #. Plugin Name of the plugin/theme
 msgid "TP - TweetPress"
 msgstr ""

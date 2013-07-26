@@ -328,8 +328,8 @@ function tp_oauth_confirm() {
 		do_action('tp_'.$_SESSION['tp_callback_action']);
 		$_SESSION['tp_callback_action'] = ''; // clear the action
 	}
-
-	wp_redirect(remove_query_arg('reauth', $_SESSION['tp_callback']));
+	
+	header('Location: ' . remove_query_arg('reauth', $_SESSION['tp_callback']));
 	exit;
 }
 
@@ -569,45 +569,35 @@ if( !function_exists('alt_comment_login') ) {
 }
 
 // generate avatar code for Twitter user comments
-//add_filter('get_avatar','tp_comm_avatar', 10, 5);
+add_filter('get_avatar','tp_comm_avatar', 10, 5);
 function tp_comm_avatar($avatar, $id_or_email, $size = '96', $default = '', $alt = false) {
-	
-	// check to be sure this is for a comment
-	if ( !is_object($id_or_email) || !isset($id_or_email->comment_ID) || $id_or_email->user_id)
-		 return $avatar;
-	
-	// check for tp comment meta
-	$twimg = get_comment_meta($id_or_email->comment_ID, 'twimg', true);
-	if( !$twimg ) {
-		$twuid = get_comment_meta($id_or_email->comment_ID, 'twuid', true);
-		if ($twuid) {
-			// return the avatar code
-			$avatar = "<img class='avatar avatar-{$size} twitter-avatar' src='http://api.twitter.com/" . TP_TWITTER_API_VERSION . "/users/profile_image/{$twuid}?size=bigger' width='{$size}' height='{$size}' />";
-			
-			$request = tp_do_request('users/show', array('screen_name='.$twuid), 'POST');
-			
-			//...
-		}
+	if ( is_numeric($id_or_email) ) {
+		return $avatar; // user id
 	}
 	
-	if( $twimg ) {
-		// sizes
-		switch( true ) {
+	$email = $id_or_email;
+	
+	if( is_object($id_or_email) ) {
+		$email = $id_or_email->comment_author_email;
+	}
+	
+	if( substr($email, -17) == '@fake.twitter.com' ) {
+		switch( true ) { // size
 			case $size > 73:
-				$imgsize = 'original';
+				$imgsize = 'large';
 				break;
 			case $size > 48:
-				$imgsize = 'normal';
-				break;
-			case $size > 24:
 			default:
-				$imgsize = 'mini';
+				$imgsize = 'small';
 				break;
 		}
-		$img = str_replace('normal', $imgsize, $twimg);
-		$avatar = "<img class='avatar avatar-{$size} twitter-avatar' src='$img' width='{$size}' height='{$size}' />";
+		
+		// user id
+		$twuid = substr($email, 0, -17);
+		
+		$avatar = "<img class='avatar avatar-{$size} twitter-avatar' src='http://avatars.io/twitter/{$twuid}?size={$imgsize}' width='{$size}' height='{$size}' />";
 	}
-
+	
 	return $avatar;
 }
 
