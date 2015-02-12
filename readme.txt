@@ -1,9 +1,9 @@
 === Plugin Name ===
 Contributors: louyx
-Author URL: http://louyblog.wordpress.com/
+Author URL: http://l0uy.com/
 Tags: twitter, oauth, login, tweet, tweetbutton, comment, publish, connect, admin, plugin, comments, wpmu, button
 Requires at least: 3.0
-Tested up to: 3.3
+Tested up to: 4.1
 Stable tag: 1.4
 
 All the tools you need to integrate your wordpress and twitter.
@@ -24,6 +24,10 @@ highly customizable and easy to use.
 * Add a follow button to your blog
 
 == Changelog ==
+
+= 2.0 =
+* Now using CodeBird PHP Twitter library
+* Many bugfixes and cleanups
 
 = 1.4 =
 * Update to use twitter 1.1 api version
