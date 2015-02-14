@@ -18,7 +18,7 @@ function oauth_init() {
 	global $wp, $oauth_activate;
 
 	add_rewrite_rule('oauth/(.+)/?$', 'index.php?oauth=$matches[1]',1);
-	add_rewrite_rule('oauth/?', 'index.php?oauth=null',1);
+	add_rewrite_rule('oauth/?', 'index.php?oauth=',1);
 
 	$wp->add_query_var('oauth');
 }
@@ -45,7 +45,7 @@ function oauth_link($site,$args=array()){
 	} else {
 		$link = add_query_arg(array(
 			'oauth' => $site
-		), $link);;
+		), $link . '/');
 	}
 	$link = add_query_arg($args, $link);
 
