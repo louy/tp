@@ -2,7 +2,7 @@
 Contributors: louyx
 Author URL: http://l0uy.com/
 Tags: twitter, oauth, login, tweet, tweetbutton, comment, publish, connect, admin, plugin, comments, wpmu, button
-Requires at least: 3.0
+Requires at least: 3.3
 Tested up to: 4.1
 Stable tag: 1.4
 
