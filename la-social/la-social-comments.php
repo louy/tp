@@ -109,7 +109,7 @@ class LA_Social_Comments extends LA_Social_Module {
 				var data = { action: '<?php echo $this->ajax_hook(); ?>' };
 				$.post(ajax_url, data, function(response) {
 					if (response != '0') {
-						$('#alt-comment-login').hide();
+						$('#alt-comment-login, #respond .comment-notes').hide();
 						$('#comment-user-details').hide().after(response);
 					}
 				});
