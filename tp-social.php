@@ -159,7 +159,7 @@ class TP_Social extends LA_Social {
 				));
 
 				if( $reply->httpstatus !== 200 ) {
-					$this->oauth_error( $reply );
+					$this->oauth_error( 'Error ' . $reply->httpstatus, $reply );
 				}
 
 				// store the token (which is different from the request token!)
@@ -211,7 +211,7 @@ class TP_Social extends LA_Social {
 			));
 
 			if( $reply->httpstatus !== 200 ) {
-				$this->oauth_error( $reply );
+				$this->oauth_error( 'Error ' . $reply->httpstatus, $reply );
 			}
 
 			$cb->setToken($reply->oauth_token, $reply->oauth_token_secret);
@@ -237,7 +237,7 @@ class TP_Social extends LA_Social {
 
 	function oauth_error( $message, $object = null ) {
 		wp_die(
-			( !empty( $message ) ? $message : 'Unknown Twitter API Error.' ) . "\n" .
+			( !empty( $message ) ? print_r($message,true) : 'Unknown Twitter API Error.' ) . "\n" .
 			( WP_DEBUG ? '<pre style="overflow:scroll; direction: ltr; background: #efefef; padding: 10px;">' . esc_html( print_r( $object, true ) ) . '</pre>'
 				 : '' )
 			, 'Twitter OAuth Error' );
